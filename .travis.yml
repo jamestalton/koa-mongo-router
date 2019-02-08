@@ -9,6 +9,8 @@ git:
 services:
     - mongodb
 
+if: tag IS blank
+
 script: npm run test && npm run lint && npm run check-format && npm run build
 
 jobs:
