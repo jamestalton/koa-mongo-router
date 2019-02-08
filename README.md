@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router)
 
-# REST API
+## REST API
 
 1. [REST Operations](#REST-Operations)
 1. [Query String](#Query-String)
