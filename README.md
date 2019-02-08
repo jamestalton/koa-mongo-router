@@ -1,3 +1,9 @@
+# KOA REST API Router for MongoDB
+
+## Status: BETA
+
+[![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router)
+
 # REST API
 
 1. [REST Operations](#REST-Operations)

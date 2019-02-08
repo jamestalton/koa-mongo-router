@@ -10,12 +10,13 @@ services:
     - mongodb
 
 script: npm run test && npm run lint && npm run check-format && npm run build
-# jobs:
-#     include:
-#         - stage: release
-# 		  node_js: 10
-#           deploy:
-#               provider: script
-#               skip_cleanup: true
-#               script:
-#                   - npx semantic-release
+
+jobs:
+    include:
+        - stage: release
+		  node_js: 10
+          deploy:
+              provider: script
+              skip_cleanup: true
+              script:
+                  - npx semantic-release
