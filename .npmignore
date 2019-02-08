@@ -5,10 +5,12 @@ test
 .dockerignore
 .gitignore
 .npmignore
+.travis.yml
+.npmrc
 docker-compose.yml
 Dockerfile
 jest.config.js
-prettirer.config.js
+prettier.config.js
 tsconfig.json
 tslint.json
 webpack.config.js
