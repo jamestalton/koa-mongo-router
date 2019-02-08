@@ -1,0 +1,19 @@
+{
+    "extends": ["tslint:latest", "tslint-config-prettier"],
+    "defaultSeverity": "error",
+    "rules": {
+        "semicolon": false,
+        "only-arrow-functions": false,
+        "object-literal-sort-keys": false,
+        "prefer-conditional-expression": false,
+        "no-floating-promises": true,
+        "strict-boolean-expressions": true,
+        "triple-equals": [true, "allow-null-check", "allow-undefined-check"],
+        "max-line-length": false,
+        "no-bitwise": false,
+        "no-implicit-dependencies": true,
+        "interface-name": false,
+        "no-unused-variable": true,
+        "no-submodule-imports": true
+    }
+}

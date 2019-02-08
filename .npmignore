@@ -1,0 +1,14 @@
+coverage
+dist
+src
+test
+.dockerignore
+.gitignore
+.npmignore
+docker-compose.yml
+Dockerfile
+jest.config.js
+prettirer.config.js
+tsconfig.json
+tslint.json
+webpack.config.js

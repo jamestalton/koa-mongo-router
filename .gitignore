@@ -1,0 +1,7 @@
+certs/
+node_modules/
+lib/
+coverage/
+data/
+dist/
+public/
