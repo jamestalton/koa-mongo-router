@@ -1,10 +1,5 @@
 language: node_js
-node_js:
-	- 10
+node_js: 10
 services:
     - mongodb
-script:
-	- npm run test
-	- npm run lint
-	- npm run check-format
-	- npm run build
+script: npm run test && npm run lint && npm run check-format && npm run build
