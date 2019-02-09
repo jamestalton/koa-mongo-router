@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ILogger } from './logger'
+import { ILogger, logLevel, LogLevel } from './logger'
 
 const Reset = '\x1b[0m'
 const Bright = '\x1b[1m'
@@ -15,43 +15,6 @@ const FgWhite = '\x1b[37m'
 
 const enabled = process.env.LOGGER !== 'false'
 const color = process.env.LOG_COLOR !== 'false'
-
-enum LogLevel {
-    None,
-    Error,
-    Warn,
-    Info,
-    Debug,
-    Silly
-}
-
-let logLevel: LogLevel = LogLevel.Info
-
-switch (process.env.LOG_LEVEL) {
-    case 'Silly':
-    case 'silly':
-    case 'SILLY':
-        logLevel = LogLevel.Silly
-        break
-    case 'Debug':
-    case 'debug':
-    case 'DEBUG':
-        logLevel = LogLevel.Debug
-        break
-    case 'Warn':
-    case 'warn':
-    case 'WARN':
-    case 'Warning':
-    case 'warning':
-    case 'WARNING':
-        logLevel = LogLevel.Warn
-        break
-    case 'Error':
-    case 'error':
-    case 'ERROR':
-        logLevel = LogLevel.Error
-        break
-}
 
 function log(level: string, logObject: object) {
     let msg = ''
@@ -75,6 +38,7 @@ function log(level: string, logObject: object) {
     }
     msg += `${level}${Bright}${FgBlack}:${Reset}${FgWhite}${(logObject as any).message}`
     delete (logObject as any).message
+    delete (logObject as any).level
 
     let data = JSON.stringify(logObject)
     data = data.substr(1, data.length - 2)

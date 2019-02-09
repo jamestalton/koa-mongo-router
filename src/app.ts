@@ -5,6 +5,7 @@ import { Http2SecureServer } from 'http2'
 import * as Koa from 'koa'
 import * as compress from 'koa-compress'
 import * as helmet from 'koa-helmet'
+import { logger } from './logger'
 import { closeMongoClient, databaseRouter } from './mongo-router'
 import { requestLogger } from './request-logger'
 import { createAppServer, shutdownAppServer } from './server'
@@ -24,6 +25,8 @@ export async function startApp() {
 }
 
 export async function shutdownApp() {
+    logger.info({ message: 'app shutting down' })
     await shutdownAppServer(server)
     await closeMongoClient()
+    logger.info({ message: 'app shutdown' })
 }
