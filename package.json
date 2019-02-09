@@ -23,7 +23,7 @@
         "lint-fix": "tslint -p . --fix && tslint -p test -c test/tslint.json --fix",
         "check-format": "prettier --list-different **/*.ts **/*.json **/*.md !coverage/** !lib/** !dist/** !**/package-lock.json",
         "format": "prettier --write **/*.ts **/*.json **/*.md !coverage/** !lib/** !dist/** !**/package-lock.json",
-        "start": "NODE_ENV=development LOG_LEVEL=silly PORT=3000 MAX_WORKERS=8 ts-node-dev --no-notify --respawn --transpileOnly src/main.ts",
+        "start": "NODE_ENV=development LOG_LEVEL=debug PORT=3000 MAX_WORKERS=2 ts-node-dev --no-notify --respawn --transpileOnly src/main.ts",
         "clean": "rm -rf package-lock.json node_modules lib dist coverage",
         "update": "npm run clean && ncu -a && npm install && npm test",
         "docker:build": "npm test && docker build --pull -t app .",
