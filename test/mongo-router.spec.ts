@@ -3,7 +3,7 @@ import { Server } from 'http'
 import { Http2SecureServer } from 'http2'
 import * as Koa from 'koa'
 import { AddressInfo } from 'net'
-import { closeMongoClient, databaseRouter, IPutCollectionResponse } from '../src/mongo-router'
+import { closeMongoClient, getMongoRouter, IPutCollectionResponse } from '../src/mongo-router'
 import { createAppServer, shutdownAppServer } from '../src/server'
 
 const database = `test`
@@ -13,7 +13,8 @@ let request: axios.AxiosInstance
 let server: Server | Http2SecureServer
 
 beforeAll(async function() {
-    const app = new Koa().use(databaseRouter.routes())
+    const mongoRouter = await getMongoRouter()
+    const app = new Koa().use(mongoRouter.routes())
     server = await createAppServer(app.callback())
     const port = (server.address() as AddressInfo).port
     request = axios.default.create({
