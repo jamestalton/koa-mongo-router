@@ -82,6 +82,12 @@ switch (process.env.LOG_LEVEL) {
     case 'DEBUG':
         logLevel = LogLevel.Debug
         break
+    default:
+    case 'Info':
+    case 'info':
+    case 'INFO':
+        logLevel = LogLevel.Info
+        break
     case 'Warn':
     case 'warn':
     case 'WARN':
@@ -95,7 +101,6 @@ switch (process.env.LOG_LEVEL) {
     case 'ERROR':
         logLevel = LogLevel.Error
         break
-    default:
     case 'None':
     case 'none':
     case 'NONE':
