@@ -25,19 +25,19 @@ const app = new Koa().use(mongoRouter.routes()).use(mongoRouter.allowedMethods()
 
 ### REST Operations
 
-| Method | Route                      | Description                            |
-| -----: | -------------------------- | -------------------------------------- |
-|    GET | /:database/:collection     | [Get items](#Get-Items)                |
-|   POST | /:database/:collection     | [Create an item](#Create-An-Item)      |
-|    PUT | /:database/:collection     | [Create or replace items](#Put-Items)  |
-|  PATCH | /:database/:collection     | [Update items](#Patch-Items)           |
-| DELETE | /:database/:collection     | [Delete items](#Delete-Items)          |
-|    GET | /:database/:collection/:id | [Get an item](#Get-Item)               |
-|    PUT | /:database/:collection/:id | [Create or replace an item](#Get-Item) |
-|  PATCH | /:database/:collection/:id | [Update an item](#Get-Item)            |
-| DELETE | /:database/:collection/:id | [Delete an item](#Get-Item)            |
+| Method | Route                      | Description                                          |
+| -----: | -------------------------- | ---------------------------------------------------- |
+|    GET | /:database/:collection     | [Get items](#Get-Items)                              |
+|   POST | /:database/:collection     | [Create an item](#Create-An-Item)                    |
+|    PUT | /:database/:collection     | [Create or replace items](#Create-Or-Replace-Items)  |
+|  PATCH | /:database/:collection     | [Update items](#Update-Items)                        |
+| DELETE | /:database/:collection     | [Delete items](#Delete-Items)                        |
+|    GET | /:database/:collection/:id | [Get an item](#Get-An-Item)                          |
+|    PUT | /:database/:collection/:id | [Create or replace an item](#Get-Or-Replace-An-Item) |
+|  PATCH | /:database/:collection/:id | [Update an item](#Update-An-Item)                    |
+| DELETE | /:database/:collection/:id | [Delete an item](#Delete-An-Item)                    |
 
-#### Get Items
+## Get Items
 
 Get items from a collection. Items can be filtered, paged, sorted, and counted using [query string](#Query-String) parameters.
 
@@ -49,7 +49,7 @@ Get items from a collection. Items can be filtered, paged, sorted, and counted u
 |   Codes | 200 Success            |
 |         | 304 Not Modified       | Conditional GET |
 
-#### Create An Item
+## Create An Item
 
 Create a new item. This creates a new \_id and assigns it to the item.
 
@@ -61,7 +61,85 @@ Create a new item. This creates a new \_id and assigns it to the item.
 |      Returns | The id of the created item |
 | Status Codes | 201 Created                |
 
-### Query String Options
+## Create Or Replace Items
+
+Create or replace items.
+
+|      Request | Parameters             |
+| -----------: | ---------------------- |
+|       Method | PUT                    |
+|         Path | /:database/:collection |
+|         Body | An array of items      |
+| Status Codes | 200 OK                 |
+
+## Update Items
+
+Update items.
+
+|      Request | Parameters              |
+| -----------: | ----------------------- |
+|       Method | UPDATE                  |
+|         Path | /:database/:collection  |
+|         Body | The patch for the items |
+| Status Codes | 200 OK                  |
+
+## Delete Items
+
+Delete items.
+
+|      Request | Parameters             |
+| -----------: | ---------------------- |
+|       Method | DELETE                 |
+|         Path | /:database/:collection |
+| Status Codes | 200 OK                 |
+
+## Get An Item
+
+Get an item.
+
+|      Request | Parameters                 |
+| -----------: | -------------------------- |
+|       Method | GET                        |
+|         Path | /:database/:collection/:id |
+| Status Codes | 200 OK                     |
+|              | 404 Not Found              |
+
+## Get Or Replace An Item
+
+Get or replace an item
+
+|      Request | Parameters                 |
+| -----------: | -------------------------- |
+|       Method | PUT                        |
+|         Path | /:database/:collection/:id |
+|         Body | The item                   |
+| Status Codes | 200 OK                     |
+|              | 201 Created                |
+
+## Update An Item
+
+Update an item.
+
+|      Request | Parameters                 |
+| -----------: | -------------------------- |
+|       Method | PATCH                      |
+|         Path | /:database/:collection/:id |
+|         Body | The patch for the item     |
+| Status Codes | 200 OK                     |
+|              | 404 Not Found              |
+
+## Delete An Item
+
+Delete an item.
+
+|      Request | Parameters                 |
+| -----------: | -------------------------- |
+|       Method | DELETE                     |
+|         Path | /:database/:collection/:id |
+| Status Codes | 200 OK                     |
+|              | 404 Not Found              |
+
+## Query String Options
 
 |     Option | Description                    | Example                    |
 | ---------: | ------------------------------ | -------------------------- |
@@ -72,7 +150,7 @@ Create a new item. This creates a new \_id and assigns it to the item.
 |    \$count | Return the total count header  | ?\$count                   |
 | \$paginate | Return pagination header       | ?\$paginate                |
 
-### Query String Filtering
+## Query String Filtering
 
 |                                 Operation | Query String       |
 | ----------------------------------------: | ------------------ |
