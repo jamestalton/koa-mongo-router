@@ -4,7 +4,7 @@ A router that exposes a standard REST API for a MongoDB.
 
 ## Status: BETA
 
-[![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router)
+[![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router)[![Coverage Status](https://coveralls.io/repos/github/jamestalton/koa-mongo-router/badge.svg?branch=master)](https://coveralls.io/github/jamestalton/koa-mongo-router?branch=master)
 
 ## Usage
 
