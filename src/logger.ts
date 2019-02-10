@@ -110,40 +110,45 @@ switch (process.env.LOG_LEVEL) {
 
 setLogLevel(logLevel)
 
+export interface ILogObject {
+    message: string
+    [key: string]: any
+}
+
 export interface ILogger {
-    silly: (logObject: object) => void
-    debug: (logObject: object) => void
-    info: (logObject: object) => void
-    warn: (logObject: object) => void
-    error: (logObject: object) => void
+    silly: (logObject: ILogObject) => void
+    debug: (logObject: ILogObject) => void
+    info: (logObject: ILogObject) => void
+    warn: (logObject: ILogObject) => void
+    error: (logObject: ILogObject) => void
 }
 
 export let logger: ILogger = {
-    silly: (logObject: object) => {
+    silly: (logObject: ILogObject) => {
         if (logSilly) {
             ;(logObject as any).level = LogLevel.Silly
             activeLogger.silly(logObject)
         }
     },
-    debug: (logObject: object) => {
+    debug: (logObject: ILogObject) => {
         if (logDebug) {
             ;(logObject as any).level = LogLevel.Debug
             activeLogger.debug(logObject)
         }
     },
-    info: (logObject: object) => {
+    info: (logObject: ILogObject) => {
         if (logInfo) {
             ;(logObject as any).level = LogLevel.Info
             activeLogger.info(logObject)
         }
     },
-    warn: (logObject: object) => {
+    warn: (logObject: ILogObject) => {
         if (logWarn) {
             ;(logObject as any).level = LogLevel.Warn
             activeLogger.warn(logObject)
         }
     },
-    error: (logObject: object) => {
+    error: (logObject: ILogObject) => {
         if (logError && activeLogger != undefined) {
             ;(logObject as any).level = LogLevel.Error
             activeLogger.error(logObject)

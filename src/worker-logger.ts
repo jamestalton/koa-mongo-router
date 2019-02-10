@@ -3,30 +3,30 @@
 // This is done for performance and synchronization of the log messages.
 
 import { worker } from 'cluster'
-import { ILogger } from './logger'
+import { ILogger, ILogObject } from './logger'
 
 export let workerLogger: ILogger = {
-    silly: (logObject: object) => {
+    silly: (logObject: ILogObject) => {
         if (worker.isConnected()) {
             process.send(logObject)
         }
     },
-    debug: (logObject: object) => {
+    debug: (logObject: ILogObject) => {
         if (worker.isConnected()) {
             process.send(logObject)
         }
     },
-    info: (logObject: object) => {
+    info: (logObject: ILogObject) => {
         if (worker.isConnected()) {
             process.send(logObject)
         }
     },
-    warn: (logObject: object) => {
+    warn: (logObject: ILogObject) => {
         if (worker.isConnected()) {
             process.send(logObject)
         }
     },
-    error: (logObject: object) => {
+    error: (logObject: ILogObject) => {
         if (worker.isConnected()) {
             process.send(logObject)
         }

@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import { ILogger } from './logger'
+import { ILogger, ILogObject, LogLevel } from './logger'
 
 const Reset = '\x1b[0m'
 const Bright = '\x1b[1m'
@@ -15,7 +15,7 @@ const FgWhite = '\x1b[37m'
 
 const color = process.env.LOG_COLOR !== 'false'
 
-function log(levelString: string, logObject: object) {
+function log(levelString: string, logObject: ILogObject) {
     let msg = ''
     if (process.env.LOG_DATE !== 'false' && process.env.LOG_TIME !== 'false') {
         const date = new Date()
@@ -46,27 +46,31 @@ function log(levelString: string, logObject: object) {
     data = data.split('"').join('')
     data = `  ${FgCyan}` + data
 
-    process.stdout.write(`${msg}${data}${Reset}\n`)
+    if (level === LogLevel.Error) {
+        process.stderr.write(`${msg}${data}${Reset}\n`)
+    } else {
+        process.stdout.write(`${msg}${data}${Reset}\n`)
+    }
 }
 
 export const consoleLogger: ILogger = {
-    silly(logObject: object) {
+    silly(logObject: ILogObject) {
         const levelString = color ? `${FgMagenta}SILLY` : `SILLY`
         log(levelString, logObject)
     },
-    debug(logObject: object) {
+    debug(logObject: ILogObject) {
         const levelString = color ? `${FgBlue}DEBUG` : `DEBUG`
         log(levelString, logObject)
     },
-    info(logObject: object) {
+    info(logObject: ILogObject) {
         const levelString = color ? ` ${FgGreen}INFO` : ` INFO`
         log(levelString, logObject)
     },
-    warn(logObject: object) {
+    warn(logObject: ILogObject) {
         const levelString = color ? ` ${FgYellow}WARN` : ` WARN`
         log(levelString, logObject)
     },
-    error(logObject: object) {
+    error(logObject: ILogObject) {
         const levelString = color ? `${FgRed}ERROR` : `ERROR`
         log(levelString, logObject)
     }

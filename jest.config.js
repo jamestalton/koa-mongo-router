@@ -13,7 +13,7 @@ module.exports = {
             statements: 0
         }
     },
-    coverageReporters: ['html'],
+    coverageReporters: ['html', 'lcovonly'],
     collectCoverageFrom: ['src/**/*.ts', '!**/node_modules/**', '!<rootDir>/src/typings.d.ts'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     setupFiles: ['<rootDir>/test/jest-setup.ts']
