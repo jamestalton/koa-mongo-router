@@ -13,9 +13,12 @@ npm install koa-mongo-router
 ```
 
 ```TypeScript
+import { getMongoRouter } from './mongo-router'
 const mongoRouter = getMongoRouter()
 const app = new Koa().use(mongoRouter.routes()).use(mongoRouter.allowedMethods())
 ```
+
+> See Example: [app.ts](src/app.ts)
 
 ### REST Operations
 
