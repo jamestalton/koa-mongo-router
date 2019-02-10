@@ -17,21 +17,15 @@ const mongoRouter = getMongoRouter()
 const app = new Koa().use(mongoRouter.routes()).use(mongoRouter.allowedMethods())
 ```
 
-## REST API
-
-1. [REST Operations](#REST-Operations)
-1. [Query String](#Query-String)
-1. [Authentication]()
-
 ### REST Operations
 
-| Method | Route                      | Description                                          |
-| -----: | -------------------------- | ---------------------------------------------------- |
-|    GET | /:database/:collection     | [Get items](#Get-Items)                              |
+| Method | Route                      | Description                                          | Notes                                             |
+| -----: | -------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
+|    GET | /:database/:collection     | [Get items](#Get-Items)                              | [Query String](#Query-String)                     |
 |   POST | /:database/:collection     | [Create an item](#Create-An-Item)                    |
-|    PUT | /:database/:collection     | [Create or replace items](#Create-Or-Replace-Items)  |
-|  PATCH | /:database/:collection     | [Update items](#Update-Items)                        |
-| DELETE | /:database/:collection     | [Delete items](#Delete-Items)                        |
+|    PUT | /:database/:collection     | [Create or replace items](#Create-Or-Replace-Items)  | [Query String Filtering](#Query-String-Filtering) |
+|  PATCH | /:database/:collection     | [Update items](#Update-Items)                        | [Query String Filtering](#Query-String-Filtering) |
+| DELETE | /:database/:collection     | [Delete items](#Delete-Items)                        | [Query String Filtering](#Query-String-Filtering) |
 |    GET | /:database/:collection/:id | [Get an item](#Get-An-Item)                          |
 |    PUT | /:database/:collection/:id | [Create or replace an item](#Get-Or-Replace-An-Item) |
 |  PATCH | /:database/:collection/:id | [Update an item](#Update-An-Item)                    |
@@ -139,7 +133,9 @@ Delete an item.
 | Status Codes | 200 OK                     |
 |              | 404 Not Found              |
 
-## Query String Options
+## Query String
+
+### Query String Options
 
 |     Option | Description                    | Example                    |
 | ---------: | ------------------------------ | -------------------------- |
@@ -150,7 +146,7 @@ Delete an item.
 |    \$count | Return the total count header  | ?\$count                   |
 | \$paginate | Return pagination header       | ?\$paginate                |
 
-## Query String Filtering
+### Query String Filtering
 
 |                                 Operation | Query String       |
 | ----------------------------------------: | ------------------ |
