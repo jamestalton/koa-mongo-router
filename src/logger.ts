@@ -1,15 +1,75 @@
 /* istanbul ignore file */
 
 export enum LogLevel {
-    None,
-    Error,
-    Warn,
-    Info,
-    Debug,
-    Silly
+    None = 'None',
+    Error = 'Error',
+    Warn = 'Warn',
+    Info = 'Info',
+    Debug = 'Debug',
+    Silly = 'Silly'
 }
 
-export let logLevel: LogLevel = LogLevel.Info
+let logLevel: LogLevel = LogLevel.Info
+let logSilly = false
+let logDebug = false
+let logInfo = false
+let logWarn = false
+let logError = false
+
+export function setLogLevel(newLogLevel: LogLevel) {
+    logLevel = newLogLevel
+
+    switch (logLevel) {
+        case LogLevel.Silly:
+            logSilly = true
+            logDebug = true
+            logInfo = true
+            logWarn = true
+            logError = true
+            break
+
+        case LogLevel.Debug:
+            logSilly = false
+            logDebug = true
+            logInfo = true
+            logWarn = true
+            logError = true
+            break
+
+        case LogLevel.Info:
+            logSilly = false
+            logDebug = false
+            logInfo = true
+            logWarn = true
+            logError = true
+            break
+
+        case LogLevel.Warn:
+            logSilly = false
+            logDebug = false
+            logInfo = false
+            logWarn = true
+            logError = true
+            break
+
+        case LogLevel.Error:
+            logSilly = false
+            logDebug = false
+            logInfo = false
+            logWarn = false
+            logError = true
+            break
+
+        default:
+        case LogLevel.None:
+            logSilly = false
+            logDebug = false
+            logInfo = false
+            logWarn = false
+            logError = false
+            break
+    }
+}
 
 switch (process.env.LOG_LEVEL) {
     case 'Silly':
@@ -35,7 +95,15 @@ switch (process.env.LOG_LEVEL) {
     case 'ERROR':
         logLevel = LogLevel.Error
         break
+    default:
+    case 'None':
+    case 'none':
+    case 'NONE':
+        logLevel = LogLevel.None
+        break
 }
+
+setLogLevel(logLevel)
 
 export interface ILogger {
     silly: (logObject: object) => void
@@ -46,23 +114,40 @@ export interface ILogger {
 }
 
 export let logger: ILogger = {
-    silly: (object: object) => {
-        /**/
+    silly: (logObject: object) => {
+        if (logSilly) {
+            ;(logObject as any).level = LogLevel.Silly
+            activeLogger.silly(logObject)
+        }
     },
-    debug: (object: object) => {
-        /**/
+    debug: (logObject: object) => {
+        if (logDebug) {
+            ;(logObject as any).level = LogLevel.Debug
+            activeLogger.debug(logObject)
+        }
     },
-    info: (object: object) => {
-        /**/
+    info: (logObject: object) => {
+        if (logInfo) {
+            ;(logObject as any).level = LogLevel.Info
+            activeLogger.info(logObject)
+        }
     },
-    warn: (object: object) => {
-        /**/
+    warn: (logObject: object) => {
+        if (logWarn) {
+            ;(logObject as any).level = LogLevel.Warn
+            activeLogger.warn(logObject)
+        }
     },
-    error: (object: object) => {
-        /**/
+    error: (logObject: object) => {
+        if (logError && activeLogger != undefined) {
+            ;(logObject as any).level = LogLevel.Error
+            activeLogger.error(logObject)
+        }
     }
 }
 
+let activeLogger: ILogger
+
 export function setLogger(newLogger: ILogger) {
-    logger = newLogger
+    activeLogger = newLogger
 }

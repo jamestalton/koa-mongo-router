@@ -1,17 +1,18 @@
 /* istanbul ignore file */
 import * as cluster from 'cluster'
 import * as os from 'os'
-import { consoleLogger } from './console-logger'
-import { logger, LogLevel, setLogger } from './logger'
+import { ILogger, logger, LogLevel, setLogger } from './logger'
 import { closeMongoClient } from './mongo-router'
 import { initializeProcess } from './process'
 import { workerLogger } from './worker-logger'
 
-export function startCluster(startApp: () => Promise<any>, shutdownApp: () => Promise<any>) {
-    if (cluster.isMaster) {
-        setLogger(consoleLogger)
-    } else {
-        setLogger(workerLogger)
+export function startCluster(startApp: () => Promise<any>, shutdownApp: () => Promise<any>, useLogger?: ILogger) {
+    if (useLogger != undefined) {
+        if (cluster.isMaster) {
+            setLogger(useLogger)
+        } else {
+            setLogger(workerLogger)
+        }
     }
 
     if (cluster.isMaster) {
