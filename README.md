@@ -103,7 +103,7 @@ Get an item.
 
 ## Get Or Replace An Item
 
-Get or replace an item
+Get or replace an item.
 
 |      Request | Parameters                 |
 | -----------: | -------------------------- |
