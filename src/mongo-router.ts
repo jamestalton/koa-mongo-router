@@ -326,17 +326,6 @@ interface IParams {
     id: string
 }
 
-async function permissionCheckCallback(database: string, collection: string) {
-    return true
-}
-
-async function permissionCheck(param: string, ctx: Koa.Context, next: () => Promise<any>) {
-    const params: IParams = ctx.params
-    if (await permissionCheckCallback(params.database, params.collection)) {
-        await next()
-    }
-}
-
 const bodyParser = BodyParser()
 
 export interface IMongoRouterOptions {
