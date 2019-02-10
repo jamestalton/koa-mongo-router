@@ -13,7 +13,6 @@ const FgMagenta = '\x1b[35m'
 const FgCyan = '\x1b[36m'
 const FgWhite = '\x1b[37m'
 
-const enabled = process.env.LOGGER !== 'false'
 const color = process.env.LOG_COLOR !== 'false'
 
 function log(levelString: string, logObject: object) {
