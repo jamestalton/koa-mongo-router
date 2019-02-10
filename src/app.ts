@@ -12,7 +12,7 @@ import { createAppServer, shutdownAppServer } from './server'
 let server: Server | Http2SecureServer
 
 export async function startApp() {
-    const mongoRouter = await getMongoRouter()
+    const mongoRouter = getMongoRouter()
 
     const app = new Koa()
         .use(requestLogger)

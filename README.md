@@ -1,8 +1,21 @@
 # KOA REST API Router for MongoDB
 
+A router that exposes a standard REST API for a MongoDB.
+
 ## Status: BETA
 
 [![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router)
+
+## Usage
+
+```bash
+npm install koa-mongo-router
+```
+
+```TypeScript
+const mongoRouter = getMongoRouter()
+const app = new Koa().use(mongoRouter.routes()).use(mongoRouter.allowedMethods())
+```
 
 ## REST API
 
@@ -10,7 +23,7 @@
 1. [Query String](#Query-String)
 1. [Authentication]()
 
-## REST Operations
+### REST Operations
 
 | Method | Route                      | Description                            |
 | -----: | -------------------------- | -------------------------------------- |
@@ -24,7 +37,9 @@
 |  PATCH | /:database/:collection/:id | [Update an item](#Get-Item)            |
 | DELETE | /:database/:collection/:id | [Delete an item](#Get-Item)            |
 
-### Get Items
+#### Get Items
+
+Get items from a collection. Items can be filtered, paged, sorted, and counted using [query string](#Query-String) parameters.
 
 | Request | Parameters             | Notes           |
 | ------: | ---------------------- | --------------- |
@@ -34,13 +49,9 @@
 |   Codes | 200 Success            |
 |         | 304 Not Modified       | Conditional GET |
 
-Get items from a collection. Items can be filtered, paged, sorted, and counted using [query string](#Query-String) parameters.
+#### Create An Item
 
-Example:
-
-> GET /library/books?bookName=A Tale of Two Cities
-
-### Create An Item
+Create a new item. This creates a new \_id and assigns it to the item.
 
 |      Request | Parameters                 |
 | -----------: | -------------------------- |
@@ -50,28 +61,7 @@ Example:
 |      Returns | The id of the created item |
 | Status Codes | 201 Created                |
 
-Create a new item. This creates a new id and assigns it to the item.
-
-## REST API Routes
-
-| Method | Route            | Body   | Headers          | Query | Description                                |
-| -----: | ---------------- | ------ | ---------------- | ----- | ------------------------------------------ |
-|    GET | /:collection     |        |                  |       | Get items                                  |
-|    PUT | /:collection     | Array  |                  |       | Replace collection                         |
-|    PUT | /:collection     | Array  |                  | ?!    | Create or replace items                    |
-|    PUT | /:collection     | Array  | If-None-Match:\* | ?!    | Create items that do not already exist.    |
-|    PUT | /:collection     | Array  | If-Match:\*      | ?!    | Replace items only if item already exists  |
-|   POST | /:collection     | Object |                  |       | Create item                                |
-|  PATCH | /:collection     | Object |                  |       | Update items                               |
-| DELETE | /:collection     |        |                  |       | Delete collection                          |
-|    GET | /:collection/:id |        |                  |       | Get Item                                   |
-|    PUT | /:collection/:id | Object |                  |       | Create or replace item                     |
-|    PUT | /:collection/:id | Object | If-None-Match:\* |       | Create item if item does not already exist |
-|    PUT | /:collection/:id | Object | If-Match:\*      |       | Replace item if item already exists        |
-|  PATCH | /:collection/:id | Object |                  |       | Update item                                |
-| DELETE | /:collection/:id | Object |                  |       | Delete item                                |
-
-## Query String Options
+### Query String Options
 
 |     Option | Description                    | Example                    |
 | ---------: | ------------------------------ | -------------------------- |
@@ -82,7 +72,7 @@ Create a new item. This creates a new id and assigns it to the item.
 |    \$count | Return the total count header  | ?\$count                   |
 | \$paginate | Return pagination header       | ?\$paginate                |
 
-## Query String Filtering
+### Query String Filtering
 
 |                                 Operation | Query String       |
 | ----------------------------------------: | ------------------ |

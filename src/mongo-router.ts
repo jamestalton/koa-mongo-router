@@ -332,7 +332,7 @@ export interface IMongoRouterOptions {
     permissionCheck?: (database: string, collection: string) => Promise<boolean>
 }
 
-export async function getMongoRouter(options?: IMongoRouterOptions) {
+export function getMongoRouter(options?: IMongoRouterOptions) {
     const mongoRouter = new Router()
 
     if (options != undefined && options.permissionCheck != undefined) {

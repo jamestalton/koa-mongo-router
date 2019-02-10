@@ -13,7 +13,7 @@ let request: axios.AxiosInstance
 let server: Server | Http2SecureServer
 
 beforeAll(async function() {
-    const mongoRouter = await getMongoRouter()
+    const mongoRouter = getMongoRouter()
     const app = new Koa().use(mongoRouter.routes())
     server = await createAppServer(app.callback())
     const port = (server.address() as AddressInfo).port
