@@ -5,23 +5,7 @@ import * as Router from 'koa-router'
 import { MongoClient, ObjectID } from 'mongodb'
 import { parseQueryString } from './query-string'
 
-if (process.env.MONGO_CONNECTION_STRING == undefined) {
-    process.env.MONGO_CONNECTION_STRING = 'mongodb://localhost:27017'
-}
-
-const mongoClientPromise = MongoClient.connect(process.env.MONGO_CONNECTION_STRING, {
-    useNewUrlParser: true,
-    ignoreUndefined: true
-})
-
-export function getMongoClient() {
-    return mongoClientPromise
-}
-
-export async function closeMongoClient() {
-    const mongoClient = await mongoClientPromise
-    return mongoClient.close()
-}
+let mongoClientPromise: Promise<MongoClient>
 
 export async function getDatabaseRoute(ctx: Koa.Context) {
     const params: IParams = ctx.params
@@ -329,10 +313,13 @@ interface IParams {
 const bodyParser = BodyParser()
 
 export interface IMongoRouterOptions {
+    mongoClientPromise: Promise<MongoClient>
     permissionCheck?: (database: string, collection: string) => Promise<boolean>
 }
 
 export function getMongoRouter(options?: IMongoRouterOptions) {
+    mongoClientPromise = options.mongoClientPromise
+
     const mongoRouter = new Router()
 
     if (options != undefined && options.permissionCheck != undefined) {

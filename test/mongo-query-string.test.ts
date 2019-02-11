@@ -1,4 +1,4 @@
-import { parseQueryString } from '../src/query-string'
+import { parseQueryString } from '../src'
 
 describe('mongo-query-string', async function() {
     it('should parse empty query', async function() {

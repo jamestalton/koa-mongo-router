@@ -1,21 +1,26 @@
 import * as axios from 'axios'
-import { Server } from 'http'
-import { Http2SecureServer } from 'http2'
+import { createServer, Server } from 'http'
 import * as Koa from 'koa'
+import { MongoClient } from 'mongodb'
 import { AddressInfo } from 'net'
-import { closeMongoClient, getMongoRouter, IPutCollectionResponse } from '../src/mongo-router'
-import { createAppServer, shutdownAppServer } from '../src/server'
+import { getMongoRouter, IPutCollectionResponse } from '../src'
 
 const database = `test`
 const collection = `test`
 
 let request: axios.AxiosInstance
-let server: Server | Http2SecureServer
+let server: Server
+let mongoClientPromise: Promise<MongoClient>
 
 beforeAll(async function() {
-    const mongoRouter = getMongoRouter()
+    mongoClientPromise = MongoClient.connect('mongodb://localhost:27017', {
+        useNewUrlParser: true
+    })
+    const mongoRouter = getMongoRouter({
+        mongoClientPromise
+    })
     const app = new Koa().use(mongoRouter.routes())
-    server = await createAppServer(app.callback())
+    server = createServer(app.callback()).listen()
     const port = (server.address() as AddressInfo).port
     request = axios.default.create({
         baseURL: `http://localhost:${port}/`,
@@ -32,8 +37,9 @@ beforeEach(async () => {
 
 afterAll(async function() {
     await request.delete(`/${database}`)
-    await shutdownAppServer(server)
-    await closeMongoClient()
+    await new Promise(resolve => server.close(resolve))
+    const mongoClient = await mongoClientPromise
+    await mongoClient.close()
 })
 
 interface IMockItem {
