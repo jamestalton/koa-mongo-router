@@ -1,9 +1,10 @@
-import * as JSONStream from 'JSONStream'
 import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
 import { MongoClient, ObjectID } from 'mongodb'
 import { parseQueryString } from './query-string'
+
+const JSONStream = require('JSONStream') // tslint:disable-line
 
 let mongoClientPromise: Promise<MongoClient>
 
@@ -314,12 +315,7 @@ const bodyParser = BodyParser()
 
 export interface IMongoRouterOptions {
     mongoClientPromise: Promise<MongoClient>
-    permissionCheck?: (
-        ctx: Koa.Context,
-        next: () => Promise<any>,
-        database: string,
-        collection: string
-    ) => Promise<boolean>
+    permissionCheck?: (ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) => Promise<any>
 }
 
 export function getMongoRouter(options?: IMongoRouterOptions) {

@@ -18,12 +18,15 @@ import { MongoClient } from 'mongodb'
 
 const mongoClientPromise = MongoClient.connect('mongodb://localhost:27017')
 
+// Example permission check function
 async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) {
+    // Assumes you have middleware that already adds a user
     if (ctx.state.user == undefined) {
         ctx.status = 401
         return
     }
 
+    // Example of validating if a user has read or write permissions
     switch (ctx.Method) {
         case 'GET':
             if (!ctx.state.user.canRead(database, collection)) {
@@ -43,6 +46,7 @@ async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, datab
             break
     }
 
+    // If user haas permission for method, then continue on
     await next()
 }
 
