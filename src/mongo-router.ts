@@ -33,6 +33,30 @@ export async function getCollectionRoute(ctx: Koa.Context) {
     const db = mongoClient.db(params.database)
     const collection = db.collection(params.collection)
     const query = parseQueryString(ctx.request.querystring)
+
+    let schema: any
+    if (query.invalid === true || query.valid === true) {
+        const collectionInfos = await db.listCollections({ name: params.collection }).toArray()
+        if (collectionInfos.length === 1) {
+            const collectionInfo = collectionInfos[0]
+            if (collectionInfo.options != undefined && collectionInfo.options.validator != undefined) {
+                schema = collectionInfo.options.validator.$jsonSchema
+            }
+        }
+    }
+
+    if (schema != undefined) {
+        if (query.invalid === true) {
+            query.filter = {
+                $and: [query.filter, { $nor: [{ $jsonSchema: schema }] }]
+            }
+        } else {
+            query.filter = {
+                $and: [query.filter, { $jsonSchema: schema }]
+            }
+        }
+    }
+
     const cursor = await collection.find(query.filter)
     if (query.count === true) {
         const count = await cursor.count()
@@ -50,6 +74,7 @@ export async function getCollectionRoute(ctx: Koa.Context) {
     if (query.fields != undefined) {
         cursor.project(query.fields)
     }
+
     const stream = JSONStream.stringify('[', ',', ']')
     cursor.stream().pipe(stream)
     ctx.set('content-type', 'application/json; charset=utf-8')
@@ -323,6 +348,7 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
 
     const mongoRouter = new Router()
 
+    /* istanbul ignore else */
     if (options != undefined && options.permissionCheck != undefined) {
         mongoRouter.param('database', async (param: string, ctx: Koa.Context, next: () => Promise<any>) => {
             const params: IParams = ctx.params
