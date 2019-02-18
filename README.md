@@ -2,7 +2,7 @@
 
 A router that exposes a standard REST API for a MongoDB.
 
-## Status: BETA
+## Status: BETA-1
 
 [![Build Status](https://travis-ci.com/jamestalton/koa-mongo-router.svg?branch=master)](https://travis-ci.com/jamestalton/koa-mongo-router) [![Coverage Status](https://coveralls.io/repos/github/jamestalton/koa-mongo-router/badge.svg?branch=master)](https://coveralls.io/github/jamestalton/koa-mongo-router?branch=master)
 
@@ -14,8 +14,46 @@ npm install koa-mongo-router
 
 ```TypeScript
 import { getMongoRouter } from './mongo-router'
-const mongoRouter = getMongoRouter()
-const app = new Koa().use(mongoRouter.routes()).use(mongoRouter.allowedMethods())
+import { MongoClient } from 'mongodb'
+
+const mongoClientPromise = MongoClient.connect('mongodb://localhost:27017')
+
+async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) {
+    if (ctx.state.user == undefined) {
+        ctx.status = 401
+        return
+    }
+
+    switch (ctx.Method) {
+        case 'GET':
+            if (!ctx.state.user.canRead(database, collection)) {
+                ctx.status = 403
+                return
+            }
+            break
+
+        case 'PUT':
+        case 'POST':
+        case 'PATCH':
+        case 'DELETE':
+            if (!ctx.state.user.canWrite(database, collection)) {
+                ctx.status = 403
+                return
+            }
+            break
+    }
+
+    await next()
+}
+
+const mongoRouter = getMongoRouter({
+    mongoClientPromise,
+    permissionCheck
+})
+
+const app = new Koa()
+    .use(mongoRouter.routes())
+    .use(mongoRouter.allowedMethods())
 ```
 
 ### REST Operations
@@ -165,3 +203,5 @@ Delete an item.
 | field starts with case-insensitive string | ?foo^=bar          |
 |   field ends with case-insensitive string | ?foo\$=bar         |
 |                             record exists | ?!                 |
+
+## Permission Check

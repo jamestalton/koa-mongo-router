@@ -314,7 +314,12 @@ const bodyParser = BodyParser()
 
 export interface IMongoRouterOptions {
     mongoClientPromise: Promise<MongoClient>
-    permissionCheck?: (database: string, collection: string) => Promise<boolean>
+    permissionCheck?: (
+        ctx: Koa.Context,
+        next: () => Promise<any>,
+        database: string,
+        collection: string
+    ) => Promise<boolean>
 }
 
 export function getMongoRouter(options?: IMongoRouterOptions) {
@@ -325,9 +330,7 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
     if (options != undefined && options.permissionCheck != undefined) {
         mongoRouter.param('database', async (param: string, ctx: Koa.Context, next: () => Promise<any>) => {
             const params: IParams = ctx.params
-            if (await options.permissionCheck(params.database, params.collection)) {
-                await next()
-            }
+            await options.permissionCheck(ctx, next, params.database, params.collection)
         })
     }
 
