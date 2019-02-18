@@ -19,6 +19,7 @@
     "scripts": {
         "build": "rm -rf lib && tsc",
         "test": "rm -rf coverage && jest",
+        "start": "ts-node example/example.ts",
         "lint": "tslint -p . && tslint -p test -c test/tslint.json",
         "lint-fix": "tslint -p . --fix && tslint -p test -c test/tslint.json --fix",
         "check-format": "prettier --list-different **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
@@ -47,6 +48,7 @@
         "semantic-release": "^15.13.3",
         "semantic-release-cli": "^4.1.0",
         "ts-jest": "^23.10.5",
+        "ts-node": "^8.0.2",
         "tslint": "^5.12.1",
         "tslint-config-prettier": "^1.18.0",
         "typescript": "^3.3.3"
