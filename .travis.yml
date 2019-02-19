@@ -12,15 +12,14 @@ env:
     global:
         - MONGODB=4.0.1
 
-before_script:
-    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz -O /tmp/mongodb.tgz
-    - tar -xvf /tmp/mongodb.tgz
-    - mkdir /tmp/data
-    - ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath /tmp/data --bind_ip 127.0.0.1 --auth &> /dev/null &
-    - sleep 15
-    - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
-
 install: npm ci
+
+before_script:
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
+    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
+    - mkdir -p ./data/db/27017
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
+    - sleep 15
 
 script: npm run test && npm run lint && npm run check-format && npm run build && cat coverage/lcov.info | coveralls
 
