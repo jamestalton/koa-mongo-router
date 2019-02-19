@@ -8,6 +8,10 @@ A router that exposes a standard REST API for a MongoDB.
 [![Coverage Status](https://coveralls.io/repos/github/jamestalton/koa-mongo-router/badge.svg?branch=master)](https://coveralls.io/github/jamestalton/koa-mongo-router?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/jamestalton/koa-mongo-router/badge.svg)](https://snyk.io/test/github/jamestalton/koa-mongo-router)
 
+1. [Usage](#Usage)
+1. [Mongo Routes](#Mongo-Routes)
+1. [Query String](#Query-String)
+
 ## Usage
 
 ```bash
@@ -62,7 +66,7 @@ const app = new Koa()
     .use(mongoRouter.allowedMethods())
 ```
 
-### REST Operations
+## Mongo Routes
 
 | Method | Route                      | Description                                          | Notes                                             |
 | -----: | -------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
@@ -209,5 +213,3 @@ Delete an item.
 | field starts with case-insensitive string | ?foo^=bar          |
 |   field ends with case-insensitive string | ?foo\$=bar         |
 |                             record exists | ?!                 |
-
-## Permission Check
