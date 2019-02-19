@@ -13,9 +13,11 @@ install: npm ci
 before_script:
     - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
     - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
-    - mkdir -p ./data/db/27017
-    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
+    - mkdir -p ./data/db
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db --syslog --port 27017 --replSet my-replica-set
     - sleep 2
+    - mongo --eval 'rs.initiate()'
+    - sleep 1
 
 script: npm run test && npm run lint && npm run check-format && npm run build
 
