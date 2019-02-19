@@ -11,6 +11,8 @@ services:
 
 if: tag IS blank
 
+install: npm ci
+
 script: npm run test && npm run lint && npm run check-format && npm run build && cat coverage/lcov.info | coveralls
 
 jobs:
