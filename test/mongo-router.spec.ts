@@ -4,8 +4,8 @@ import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
 import { IPutCollectionResponse } from '../src'
 
-const database = `test`
-const collection = `mongo-router`
+const database = `mongo-router-test`
+const collection = `items`
 
 let request: axios.AxiosInstance
 let server: Server

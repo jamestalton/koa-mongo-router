@@ -3,8 +3,8 @@ import { Server } from 'http'
 import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
 
-const database = `test`
-const collection = `schema-router`
+const database = `schema-router-test`
+const collection = `items`
 
 let request: axios.AxiosInstance
 let server: Server
