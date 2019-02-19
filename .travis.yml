@@ -17,6 +17,8 @@ before_script:
     - tar -xvf /tmp/mongodb.tgz
     - mkdir /tmp/data
     - ${PWD}/mongodb-linux-x86_64-${MONGODB}/bin/mongod --dbpath /tmp/data --bind_ip 127.0.0.1 --auth &> /dev/null &
+    - sleep 15
+    - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 
 install: npm ci
 
