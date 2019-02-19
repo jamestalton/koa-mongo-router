@@ -1,20 +1,25 @@
 language: node_js
 node_js: 10
-env: MONGODB_VERSION=3.6.x
 
 git:
     depth: false
     quiet: true
     submodules: false
 
-services:
-    - mongodb
-
 if: tag IS blank
 
 install: npm ci
 
-script: npm run test && npm run lint && npm run check-format && npm run build && cat coverage/lcov.info | coveralls
+before_script:
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
+    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
+    - mkdir -p ./data/db/27017
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
+    - sleep 2
+
+script: npm run test && npm run lint && npm run check-format && npm run build
+
+after_success: cat coverage/lcov.info | coveralls
 
 jobs:
     include:
