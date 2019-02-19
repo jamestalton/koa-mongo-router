@@ -1,6 +1,5 @@
 import * as axios from 'axios'
 import { Server } from 'http'
-import { MongoClient } from 'mongodb'
 import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
 
