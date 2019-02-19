@@ -71,7 +71,6 @@ describe(`PUT /schema/:database/:collection`, function() {
             return
         }
         expect((await request.put(`/schema/${database}/${collection}`, schema)).status).toEqual(200)
-        const response = await request.put(`/data/${database}/${collection}`, mockItems)
     })
 
     it(`should enforce the schema on the put items`, async function() {
