@@ -14,7 +14,7 @@ module.exports = {
         }
     },
     coverageReporters: ['html', 'lcovonly'],
-    collectCoverageFrom: ['src/**/*.ts', '!**/node_modules/**', '!<rootDir>/src/typings.d.ts'],
+    collectCoverageFrom: ['src/**/*.ts', '!**/node_modules/**'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     setupFiles: ['<rootDir>/test/jest-setup.ts']
 }

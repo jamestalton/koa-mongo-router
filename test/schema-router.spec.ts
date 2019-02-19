@@ -1,10 +1,10 @@
 import * as axios from 'axios'
 import { Server } from 'http'
 import { AddressInfo } from 'net'
-import { startApp, stopApp } from '../example/example'
+import { startApp, stopApp } from '../example/example-app'
 
-const database = `schemaTest`
-const collection = `schemaTest`
+const database = `test`
+const collection = `schema-router`
 
 let request: axios.AxiosInstance
 let server: Server
@@ -19,7 +19,6 @@ beforeAll(async function() {
 })
 
 beforeEach(async () => {
-    await request.put(`/schema/${database}/${collection}`, mockItems)
     await request.delete(`/data/${database}`)
     expect((await request.put(`/data/${database}/${collection}`, mockItems)).status).toEqual(200)
 })

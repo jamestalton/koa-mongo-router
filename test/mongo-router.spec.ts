@@ -1,11 +1,11 @@
 import * as axios from 'axios'
 import { Server } from 'http'
 import { AddressInfo } from 'net'
-import { startApp, stopApp } from '../example/example'
+import { startApp, stopApp } from '../example/example-app'
 import { IPutCollectionResponse } from '../src'
 
 const database = `test`
-const collection = `test`
+const collection = `mongo-router`
 
 let request: axios.AxiosInstance
 let server: Server
