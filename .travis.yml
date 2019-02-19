@@ -1,5 +1,6 @@
 language: node_js
 node_js: 10
+env: MONGODB_VERSION=3.6.x
 
 git:
     depth: false
@@ -10,6 +11,8 @@ services:
     - mongodb
 
 if: tag IS blank
+
+install: npm ci
 
 script: npm run test && npm run lint && npm run check-format && npm run build && cat coverage/lcov.info | coveralls
 

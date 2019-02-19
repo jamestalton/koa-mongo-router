@@ -8,6 +8,8 @@ export interface IMongoQuery {
     embed?: string[]
     count?: boolean
     filter: any
+    invalid?: boolean
+    valid?: boolean
 }
 
 function getValue(value: any) {
