@@ -87,6 +87,8 @@ export async function startApp() {
         .use(router.allowedMethods())
 
     server = createAppServer(app.callback())
+    ;(server as any).mongoClientPromise = mongoClientPromise
+
     return server
 }
 
