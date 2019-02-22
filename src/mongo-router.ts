@@ -169,7 +169,7 @@ export async function putCollectionRoute(ctx: Koa.Context) {
         .find(deleteFilter)
         .project({ _id: 1 })
         .toArray()).map(item => item._id)
-    const deleteManyResult = await collection.deleteMany({ _id: { $in: deleteIDs } })
+    await collection.deleteMany({ _id: { $in: deleteIDs } })
 
     const response: IPutCollectionResponse = {
         inserted: insertedIDs.map(id => id.toHexString()),
