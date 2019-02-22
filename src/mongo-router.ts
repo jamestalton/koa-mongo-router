@@ -86,6 +86,7 @@ export async function putCollectionRoute(ctx: Koa.Context) {
     const mongoClient = await mongoClientPromise
     const db = mongoClient.db(params.database)
     const collection = db.collection(params.collection)
+    const query = parseQueryString(ctx.request.querystring)
 
     const objectIDs: ObjectID[] = []
     const modifiedIDs: ObjectID[] = []
@@ -157,14 +158,25 @@ export async function putCollectionRoute(ctx: Koa.Context) {
         return
     }
     await Promise.all(promises)
-    const deleteManyResult = await collection.deleteMany({ _id: { $nin: objectIDs } })
+
+    let deleteFilter: any = { _id: { $nin: objectIDs } }
+    if (query.filter && Object.keys(query.filter).length > 0) {
+        deleteFilter = {
+            $and: [query.filter, deleteFilter]
+        }
+    }
+    const deleteIDs = (await collection
+        .find(deleteFilter)
+        .project({ _id: 1 })
+        .toArray()).map(item => item._id)
+    const deleteManyResult = await collection.deleteMany({ _id: { $in: deleteIDs } })
 
     const response: IPutCollectionResponse = {
         inserted: insertedIDs.map(id => id.toHexString()),
         modified: modifiedIDs.map(id => id.toHexString()),
         unchanged: unchangedIDs.map(id => id.toHexString()),
-        deleted: deleteManyResult.deletedCount,
-        failedIDs: failedIDs.map(id => id.toHexString())
+        deleted: deleteIDs.map(id => id.toHexString()),
+        failed: failedIDs.map(id => id.toHexString())
     }
     ctx.body = response
 }
@@ -173,8 +185,8 @@ export interface IPutCollectionResponse {
     inserted: string[]
     modified: string[]
     unchanged: string[]
-    deleted: number
-    failedIDs: string[]
+    deleted: string[]
+    failed: string[]
 }
 
 export async function postCollectionRoute(ctx: Koa.Context) {
