@@ -61,8 +61,8 @@ describe(`PUT /schema/:database/:collection`, function() {
     it(`should enforce the schema on the put items`, async function() {
         expect((await request.put(`/schema/${database}/${collection}`, schema)).status).toEqual(200)
         const response = await request.put(`/data/${database}/${collection}`, mockItems)
-        expect(response.data.deleted).toEqual(2)
-        expect(response.data.failedIDs).toHaveLength(1)
+        expect(response.data.deleted).toHaveLength(2)
+        expect(response.data.failed).toHaveLength(1)
         expect(response.data.inserted).toHaveLength(1)
     })
 

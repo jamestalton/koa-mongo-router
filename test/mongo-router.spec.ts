@@ -107,7 +107,7 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.inserted).toHaveLength(mockItems.length)
         expect(putResponse.data.modified).toHaveLength(0)
         expect(putResponse.data.unchanged).toHaveLength(0)
-        expect(putResponse.data.deleted).toEqual(0)
+        expect(putResponse.data.deleted).toHaveLength(0)
 
         const getResponse = await request.get<IMockItem[]>(`/data/${database}/${collection}`)
         expect(getResponse.status).toEqual(200)
@@ -122,7 +122,7 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.inserted).toHaveLength(mockItems.length)
         expect(putResponse.data.modified).toHaveLength(0)
         expect(putResponse.data.unchanged).toHaveLength(0)
-        expect(putResponse.data.deleted).toEqual(0)
+        expect(putResponse.data.deleted).toHaveLength(0)
 
         const getResponse = await request.get<IMockItem[]>(`/data/${database}/${collection}`)
         expect(getResponse.status).toEqual(200)
@@ -138,7 +138,7 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.inserted).toHaveLength(2)
         expect(putResponse.data.modified).toHaveLength(1)
         expect(putResponse.data.unchanged).toHaveLength(1)
-        expect(putResponse.data.deleted).toEqual(2)
+        expect(putResponse.data.deleted).toHaveLength(2)
     })
 
     it(`should return status 400 if the request is a object`, async function() {
