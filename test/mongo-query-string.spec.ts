@@ -345,6 +345,14 @@ describe('mongo-query-string', async function() {
         })
     })
 
+    it('should parse ?!', async function() {
+        expect(parseQueryString('!')).toEqual({
+            filter: {
+                _id: { $exists: false }
+            }
+        })
+    })
+
     it('should handle or operations', async function() {
         expect(parseQueryString('a=b|c=d&$limit=2')).toEqual({
             limit: 2,
