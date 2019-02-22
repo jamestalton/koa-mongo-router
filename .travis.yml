@@ -8,6 +8,10 @@ git:
 
 if: tag IS blank
 
+branches:
+    only:
+        - master
+
 install: npm ci
 
 before_script:
