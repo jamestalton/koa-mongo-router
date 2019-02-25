@@ -69,7 +69,7 @@ export async function getCollectionRoute(ctx: Koa.Context) {
         cursor.skip(query.skip)
     }
     if (query.limit != undefined) {
-        cursor.skip(query.limit)
+        cursor.limit(query.limit)
     }
     if (query.fields != undefined) {
         cursor.project(query.fields)
