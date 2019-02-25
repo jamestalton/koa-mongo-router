@@ -63,7 +63,7 @@ export async function getCollectionRoute(ctx: Koa.Context) {
         ctx.set('X-Total-Count', count.toString())
     }
     if (query.sort != undefined) {
-        cursor.sort(query.limit)
+        cursor.sort(query.sort)
     }
     if (query.skip != undefined) {
         cursor.skip(query.skip)
