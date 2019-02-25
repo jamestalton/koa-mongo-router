@@ -94,15 +94,18 @@ export async function putCollectionRoute(ctx: Koa.Context) {
     const unchangedIDs: ObjectID[] = []
     const failedIDs: ObjectID[] = []
     const promises: Array<Promise<any>> = []
+    const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
+    let activeCount = 0
+    let paused = false
     try {
         await new Promise((resolve, reject) => {
             const jsonStream = JSONStream.parse('*')
                 .on('data', async function(item: any) {
-                    // jsonStream.pause()
                     if (typeof item === 'string') {
                         reject(new Error('Bad Request'))
                         return
                     }
+
                     if (item._id != undefined) {
                         item._id = new ObjectID(item._id)
                         objectIDs.push(item._id)
@@ -124,6 +127,13 @@ export async function putCollectionRoute(ctx: Koa.Context) {
                                 .catch(() => {
                                     failedIDs.push(item._id)
                                 })
+                                .finally(() => {
+                                    activeCount--
+                                    if (paused) {
+                                        paused = false
+                                        jsonStream.resume()
+                                    }
+                                })
                         )
                     } else {
                         promises.push(
@@ -136,9 +146,21 @@ export async function putCollectionRoute(ctx: Koa.Context) {
                                 .catch(() => {
                                     failedIDs.push(item._id)
                                 })
+                                .finally(() => {
+                                    activeCount--
+                                    if (paused) {
+                                        paused = false
+                                        jsonStream.resume()
+                                    }
+                                })
                         )
                     }
-                    // jsonStream.resume()
+
+                    activeCount++
+                    if (activeCount >= maxAsyncCalls) {
+                        paused = true
+                        jsonStream.pause()
+                    }
                 })
                 .on(
                     'error',
