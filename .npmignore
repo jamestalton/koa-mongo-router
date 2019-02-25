@@ -1,5 +1,8 @@
 coverage
+data
 dist
+example
+mongodb-linux-x86_64-3.6.6
 src
 test
 .dockerignore
