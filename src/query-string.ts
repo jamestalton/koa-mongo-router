@@ -274,14 +274,14 @@ function parseQuery(ctxQuery: any) {
             switch (key) {
                 case '$limit':
                     query.limit = Number(value)
-                    if (isNaN(query.limit)) {
-                        throw new Error('query string parameter $limit must be a number')
+                    if (isNaN(query.limit) || query.limit < 1) {
+                        throw new Error('query string parameter $limit must be a number greater than 0')
                     }
                     break
                 case '$skip':
                     query.skip = Number(value)
-                    if (isNaN(query.skip)) {
-                        throw new Error('query string parameter $skip must be a number')
+                    if (isNaN(query.skip) || query.skip < 0) {
+                        throw new Error('query string parameter $skip must be a number greater than or equal to 0')
                     }
                     break
                 case '$count':

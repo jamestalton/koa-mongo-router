@@ -1,6 +1,6 @@
 import { parseQueryString } from '../src'
 
-describe('mongo-query-string', async function() {
+describe('mongo-query-string', function() {
     it('should parse empty query', async function() {
         expect(parseQueryString('')).toEqual({
             filter: {}

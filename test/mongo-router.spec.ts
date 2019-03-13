@@ -264,7 +264,7 @@ describe(`GET /:database/:collection/:id`, function() {
     // })
 })
 
-describe(`PUT /:database/:collection/:id`, async function() {
+describe(`PUT /:database/:collection/:id`, function() {
     it(`should return status 201 'Created' and create the item`, async function() {
         const mockItem = getMockItem(true)
 
@@ -344,7 +344,7 @@ describe(`PUT /:database/:collection/:id`, async function() {
     })
 })
 
-describe(`PATCH /:collection/:id`, async function() {
+describe(`PATCH /:collection/:id`, function() {
     it(`should return status 200 'OK' and patch the item`, async function() {
         const itemID = createMockItemID()
         expect((await request.put(`/data/${database}/${collection}/${itemID}`, { name: `abc` })).status).toEqual(201)
@@ -364,7 +364,7 @@ describe(`PATCH /:collection/:id`, async function() {
     })
 })
 
-describe(`DELETE /:database/:collection/:id`, async function() {
+describe(`DELETE /:database/:collection/:id`, function() {
     it(`should return status 200 'OK' and delete the item`, async function() {
         const mockItem = getMockItem(true)
         expect((await request.put(`/data/${database}/${collection}/${mockItem._id}`, mockItem)).status).toEqual(201)
