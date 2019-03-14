@@ -1,7 +1,6 @@
 export { parseQueryString } from './query-string'
 export { ILogger, ILogObject, logger } from 'node-server-utils'
 export { getMongoRouter, IPutCollectionResponse } from './mongo-router'
-export { getSchemaRouter } from './schema-router'
 export { koaErrorHandler } from './utils/koa-error-handler'
 export { koaLogger } from './utils/koa-logger'
 export { getLogEntriesLogger } from './utils/log-entries-logger'

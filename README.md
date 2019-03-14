@@ -20,9 +20,6 @@ npm install koa-mongo-router
 
 ```TypeScript
 import { getMongoRouter } from './mongo-router'
-import { MongoClient } from 'mongodb'
-
-const mongoClientPromise = MongoClient.connect('mongodb://localhost:27017')
 
 // Example permission check function
 async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) {
@@ -57,7 +54,6 @@ async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, datab
 }
 
 const mongoRouter = getMongoRouter({
-    mongoClientPromise,
     permissionCheck
 })
 

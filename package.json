@@ -42,14 +42,14 @@
         "node-server-utils": "0.0.13"
     },
     "devDependencies": {
-        "@types/jest": "^24.0.11",
+        "@types/jest": "^23.x.x",
         "axios": "^0.18.0",
         "coveralls": "^3.0.3",
-        "jest": "^24.5.0",
+        "jest": "^23.x.x",
         "prettier": "^1.16.4",
         "semantic-release": "^15.13.3",
         "semantic-release-cli": "^4.1.1",
-        "ts-jest": "^24.0.0",
+        "ts-jest": "^23.x.x",
         "ts-node": "^8.0.3",
         "ts-node-dev": "^1.0.0-pre.32",
         "tslint": "^5.14.0",

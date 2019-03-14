@@ -7,9 +7,6 @@ export async function koaErrorHandler(ctx: Koa.Context, next: () => void) {
     } catch (err) {
         /* istanbul ignore else */
         if (typeof err.status === 'number') {
-            if (err.status === 401) {
-                ctx.set('WWW-Authenticate', 'Basic')
-            }
             ctx.body = {
                 status: err.status,
                 message: STATUS_CODES[err.status],
