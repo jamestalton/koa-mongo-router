@@ -198,6 +198,7 @@ Delete an item.
 |                              field exists | ?foo               |
 |                      field does not exist | ?!foo              |
 |                              field equals | ?foo=bar           |
+|        field equals a string (don't cast) | ?foo:=bar          |
 |                      field does not equal | ?foo!=bar          |
 |                        field greater than | ?foo>10            |
 |                           field less than | ?foo<10            |
