@@ -329,7 +329,18 @@ export async function patchItemRoute(ctx: Koa.Context) {
 }
 
 function convertBodyToUpdate(body: any) {
-    return { $set: body }
+    const update: any = {}
+    for (const key of Object.keys(body)) {
+        if (key.startsWith('$')) {
+            update[key] = body[key]
+        } else {
+            if (update.$set == undefined) {
+                update.$set = {}
+            }
+            update.$set[key] = body[key]
+        }
+    }
+    return update
 }
 
 export async function deleteItemRoute(ctx: Koa.Context) {

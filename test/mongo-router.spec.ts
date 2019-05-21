@@ -381,6 +381,17 @@ describe(`PATCH /:collection/:id`, function() {
         const itemID = createMockItemID()
         expect((await request.patch(`/${database}/${collection}/${itemID}`, { name: `test` })).status).toEqual(404)
     })
+
+    it(`should return status 200 'OK' and patch the item with mongo operators`, async function() {
+        const itemID = createMockItemID()
+        expect((await request.put(`/${database}/${collection}/${itemID}`, { name: `abc`, count: 2 })).status).toEqual(
+            201
+        )
+        expect((await request.patch(`/${database}/${collection}/${itemID}`, { $inc: { count: 3 } })).status).toEqual(
+            200
+        )
+        expect((await request.get(`/${database}/${collection}/${itemID}`)).data.count).toEqual(5)
+    })
 })
 
 describe(`DELETE /:database/:collection/:id`, function() {
