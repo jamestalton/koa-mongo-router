@@ -9,7 +9,7 @@ import { parseQueryString } from './query-string'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
-const databaseFunctions: IDatabaseFunctions = mongoDatabaseFunctions
+export let databaseFunctions: IDatabaseFunctions = mongoDatabaseFunctions
 
 export async function getDatabaseRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
