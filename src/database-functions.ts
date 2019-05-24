@@ -1,3 +1,11 @@
+export interface IPutItemsResponse {
+    inserted: string[]
+    modified: string[]
+    unchanged: string[]
+    deleted: string[]
+    failed: string[]
+}
+
 export interface IDatabaseFunctions {
     getItemsStream: (
         databaseName: string,

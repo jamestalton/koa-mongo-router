@@ -2,7 +2,7 @@ import * as axios from 'axios'
 import { Server } from 'http'
 import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
-import { IPutCollectionResponse } from '../src'
+import { IPutItemsResponse } from '../src'
 
 const database = `mongo-router-test`
 const collection = `items`
@@ -121,7 +121,7 @@ describe(`PUT /:database/:collection`, function() {
     it(`should return status 200 'OK' and create collection`, async function() {
         const mockItems = getMockItems()
 
-        const putResponse = await request.put<IPutCollectionResponse>(`/${database}/${collection}`, mockItems)
+        const putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, mockItems)
         expect(putResponse.status).toEqual(200)
         expect(putResponse.data.inserted).toHaveLength(mockItems.length)
         expect(putResponse.data.modified).toHaveLength(0)
@@ -136,7 +136,7 @@ describe(`PUT /:database/:collection`, function() {
     it(`should return status 200 'OK' and delete the old items`, async function() {
         const mockItems = getMockItems()
 
-        let putResponse = await request.put<IPutCollectionResponse>(`/${database}/${collection}`, mockItems)
+        let putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, mockItems)
         expect(putResponse.status).toEqual(200)
         expect(putResponse.data.inserted).toHaveLength(mockItems.length)
         expect(putResponse.data.modified).toHaveLength(0)
@@ -152,7 +152,7 @@ describe(`PUT /:database/:collection`, function() {
         newItems[1]._id = createMockItemID() // Insert by ID
         newItems[2].name = `abc` // modified
 
-        putResponse = await request.put<IPutCollectionResponse>(`/${database}/${collection}`, getResponse.data)
+        putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, getResponse.data)
         expect(putResponse.status).toEqual(200)
         expect(putResponse.data.inserted).toHaveLength(2)
         expect(putResponse.data.modified).toHaveLength(1)
@@ -241,7 +241,7 @@ describe(`DELETE /:database/:collection`, function() {
 describe(`GET /:database/:collection/:id`, function() {
     it(`should return status 200 'OK' and the item`, async function() {
         const mockItem = getMockItem()
-        const putResponse = await request.put<IPutCollectionResponse>(`/${database}/${collection}`, [mockItem])
+        const putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, [mockItem])
         expect(putResponse.status).toEqual(200)
         const itemID = putResponse.data.inserted[0]
 
@@ -258,7 +258,7 @@ describe(`GET /:database/:collection/:id`, function() {
 
     // it(`with $fields should return status 200 and only the specified fields of the item`, async function() {
     //     const mockItem = getMockItem()
-    //     const putResponse = await request.put<IPutCollectionResponse>(`/${database}/${collection}`, [mockItem])
+    //     const putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, [mockItem])
     //     expect(putResponse.status).toEqual(200)
 
     //     const getResponse = await request.get<IMockItem>(
