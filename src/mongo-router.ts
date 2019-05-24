@@ -1,12 +1,15 @@
 import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
-import { Cursor, ObjectID } from 'mongodb'
+import { ObjectID } from 'mongodb'
+import { IDatabaseFunctions } from './database-functions'
+import { mongoDatabaseFunctions } from './mongo-functions'
 import { parseQueryString } from './query-string'
 import { getDatabase, getDatabaseCollection } from './utils/mongo'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
+const databaseFunctions: IDatabaseFunctions = mongoDatabaseFunctions
 
 export async function getDatabaseRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
@@ -28,67 +31,19 @@ export async function deleteDatabaseRoute(ctx: Koa.Context) {
 // TODO queryString support for $explain
 export async function getCollectionRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const result = await getCollection(params.database, params.collection, ctx.request.querystring)
+    const result = await databaseFunctions.getCollectionStream(
+        params.database,
+        params.collection,
+        ctx.request.querystring
+    )
 
     if (result.count != undefined) {
         ctx.set('X-Total-Count', result.count.toString())
     }
-
     const stream = JSONStream.stringify('[', ',', ']')
-    result.cursor.stream().pipe(stream)
+    result.pipe(stream)
     ctx.set('content-type', 'application/json; charset=utf-8')
     ctx.body = stream
-}
-async function getCollection(databaseName: string, collectionName: string, querystring: string) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const query = parseQueryString(querystring)
-
-    // if query includes "invalid" or "valid" get collection schema to only return valid or invalid items
-    let schema: any
-    if (query.invalid === true || query.valid === true) {
-        const db = await getDatabase(databaseName)
-        const collectionInfos = await db.listCollections({ name: collectionName }).toArray()
-        if (collectionInfos.length === 1) {
-            const collectionInfo = collectionInfos[0]
-            if (collectionInfo.options != undefined && collectionInfo.options.validator != undefined) {
-                schema = collectionInfo.options.validator.$jsonSchema
-            }
-        }
-        if (schema != undefined) {
-            if (query.invalid === true) {
-                query.filter = {
-                    $and: [query.filter, { $nor: [{ $jsonSchema: schema }] }]
-                }
-            } else {
-                query.filter = {
-                    $and: [query.filter, { $jsonSchema: schema }]
-                }
-            }
-        }
-    }
-
-    const result: {
-        count?: number
-        cursor: Cursor<any>
-    } = {
-        cursor: await collection.find(query.filter)
-    }
-    if (query.count === true) {
-        result.count = await result.cursor.count()
-    }
-    if (query.sort != undefined) {
-        result.cursor.sort(query.sort)
-    }
-    if (query.skip != undefined) {
-        result.cursor.skip(query.skip)
-    }
-    if (query.limit != undefined) {
-        result.cursor.limit(query.limit)
-    }
-    if (query.fields != undefined) {
-        result.cursor.project(query.fields)
-    }
-    return result
 }
 
 export interface IPutCollectionResponse {
@@ -225,36 +180,22 @@ export async function postCollectionRoute(ctx: Koa.Context) {
     ctx.assert(body._id === undefined, 400, 'body cannot contain an _id')
 
     const params: IParams = ctx.state
-    const result = await postCollection(params.database, params.collection, ctx.request.body)
+    const result = await databaseFunctions.postCollection(params.database, params.collection, ctx.request.body)
     ctx.status = result.status
     ctx.body = result
-}
-export async function postCollection(databaseName: string, collectionName: string, item: any) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const result = await collection.insertOne(item)
-    return {
-        status: 201,
-        _id: result.insertedId
-    }
 }
 
 export async function patchCollectionRoute(ctx: Koa.Context) {
     ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
     const params: IParams = ctx.state
-    const result = await patchCollection(params.database, params.collection, ctx.request.body, ctx.request.querystring)
+    const result = await databaseFunctions.patchCollection(
+        params.database,
+        params.collection,
+        ctx.request.body,
+        ctx.request.querystring
+    )
     ctx.status = result.status
     ctx.body = {
-        matchedCount: result.matchedCount,
-        modifiedCount: result.modifiedCount
-    }
-}
-export async function patchCollection(databaseName: string, collectionName: string, update: any, querystring: string) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const query = parseQueryString(querystring)
-    update = convertPatch(update)
-    const result = await collection.updateMany(query.filter, update)
-    return {
-        status: 200,
         matchedCount: result.matchedCount,
         modifiedCount: result.modifiedCount
     }
@@ -262,41 +203,18 @@ export async function patchCollection(databaseName: string, collectionName: stri
 
 export async function deleteCollectionRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const result = await deleteCollection(params.database, params.collection, ctx.request.querystring)
+    const result = await databaseFunctions.deleteCollection(params.database, params.collection, ctx.request.querystring)
     ctx.status = result.status
     ctx.body = result
-}
-export async function deleteCollection(databaseName: string, collectionName: string, querystring: string) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const query = parseQueryString(querystring)
-    const result = await collection.deleteMany(query.filter)
-    return {
-        status: 200,
-        deletedCount: result.deletedCount
-    }
 }
 
 // TODO - getItem queryString support for $fields
 export async function getItemRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const result = await getItem(params.database, params.collection, params.id)
+    const result = await databaseFunctions.getItem(params.database, params.collection, params.id)
     ctx.status = result.status
     if (result.status !== 404) {
         ctx.body = result.item
-    }
-}
-export async function getItem(databaseName: string, collectionName: string, id: string) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const item = await collection.findOne({ _id: new ObjectID(id) })
-    if (item == undefined) {
-        return {
-            status: 404
-        }
-    } else {
-        return {
-            status: 200,
-            item
-        }
     }
 }
 
@@ -306,81 +224,39 @@ export async function putItemRoute(ctx: Koa.Context) {
     const item = ctx.request.body
     ctx.assert(item._id == undefined || item._id === params.id, 400, 'body _id does not match id in route')
     if (ctx.request.get('if-match') === '*') {
-        ctx.status = await putItemOnlyIfAlreadyExists(params.database, params.collection, params.id, item)
+        ctx.status = await databaseFunctions.putItemOnlyIfAlreadyExists(
+            params.database,
+            params.collection,
+            params.id,
+            item
+        )
         if (ctx.status !== 404 && ctx.status !== 204) {
             ctx.body = emptyObject
         }
     } else if (ctx.request.get('if-none-match') === '*') {
-        ctx.status = await putItemOnlyIfDoesNotAlreadyExist(params.database, params.collection, params.id, item)
+        ctx.status = await databaseFunctions.putItemOnlyIfDoesNotAlreadyExist(
+            params.database,
+            params.collection,
+            params.id,
+            item
+        )
         if (ctx.status !== 404 && ctx.status !== 204) {
             ctx.body = emptyObject
         }
     } else {
-        ctx.status = await putItem(params.database, params.collection, params.id, item)
+        ctx.status = await databaseFunctions.putItem(params.database, params.collection, params.id, item)
         if (ctx.status !== 404 && ctx.status !== 204) {
             ctx.body = emptyObject
         }
-    }
-}
-export async function putItem(databaseName: string, collectionName: string, id: string, item: any) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    item._id = new ObjectID(id)
-    const result = await collection.replaceOne({ _id: item._id }, item, { upsert: true })
-    if (result.upsertedCount === 1) {
-        return 201
-    } else if (result.modifiedCount === 1) {
-        return 200
-    } else {
-        return 204
-    }
-}
-export async function putItemOnlyIfAlreadyExists(databaseName: string, collectionName: string, id: string, item: any) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    item._id = new ObjectID(id)
-    const result = await collection.replaceOne({ _id: item._id }, item, {
-        upsert: false
-    })
-    if (result.modifiedCount === 1) {
-        return 200
-    } else if (result.matchedCount === 1) {
-        return 204
-    } else {
-        return 412
-    }
-}
-export async function putItemOnlyIfDoesNotAlreadyExist(
-    databaseName: string,
-    collectionName: string,
-    id: string,
-    item: any
-) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    item._id = new ObjectID(id)
-    const result = await collection.updateOne({ _id: new ObjectID(id) }, { $setOnInsert: item }, { upsert: true })
-    if (result.upsertedCount === 1) {
-        return 201
-    } else {
-        return 412
     }
 }
 
 export async function patchItemRoute(ctx: Koa.Context) {
     ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
     const params: IParams = ctx.state
-    ctx.status = await patchItem(params.database, params.collection, params.id, ctx.request.body)
+    ctx.status = await databaseFunctions.patchItem(params.database, params.collection, params.id, ctx.request.body)
     if (ctx.status !== 404 && ctx.status !== 204) {
         ctx.body = emptyObject
-    }
-}
-export async function patchItem(databaseName: string, collectionName: string, id: string, patch: any) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const result = await collection.updateOne({ _id: new ObjectID(id) }, convertPatch(patch))
-    if (result.modifiedCount === 1) {
-        return 200
-    } else if (result.matchedCount === 1) {
-        return 204
-    } else {
-        return 404
     }
 }
 
@@ -401,18 +277,9 @@ function convertPatch(patch: any) {
 
 export async function deleteItemRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    ctx.status = await deleteItem(params.database, params.collection, params.id)
+    ctx.status = await databaseFunctions.deleteItem(params.database, params.collection, params.id)
     if (ctx.status !== 404) {
         ctx.body = emptyObject
-    }
-}
-export async function deleteItem(databaseName: string, collectionName: string, id: string) {
-    const collection = await getDatabaseCollection(databaseName, collectionName)
-    const result = await collection.deleteOne({ _id: new ObjectID(id) })
-    if (result.deletedCount === 1) {
-        return 200
-    } else {
-        return 404
     }
 }
 
