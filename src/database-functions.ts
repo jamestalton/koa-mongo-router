@@ -1,5 +1,5 @@
 export interface IDatabaseFunctions {
-    getCollectionStream: (
+    getItemsStream: (
         databaseName: string,
         collectionName: string,
         querystring: string
@@ -8,7 +8,7 @@ export interface IDatabaseFunctions {
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T
     }>
 
-    getCollection: (
+    getItems: (
         databaseName: string,
         collectionName: string,
         querystring: string
@@ -17,13 +17,9 @@ export interface IDatabaseFunctions {
         items: any[]
     }>
 
-    postCollection: (
-        databaseName: string,
-        collectionName: string,
-        item: any
-    ) => Promise<{ status: number; _id: string }>
+    postItems: (databaseName: string, collectionName: string, item: any) => Promise<{ status: number; _id: string }>
 
-    patchCollection: (
+    patchItems: (
         databaseName: string,
         collectionName: string,
         update: any,
@@ -34,7 +30,7 @@ export interface IDatabaseFunctions {
         modifiedCount: number
     }>
 
-    deleteCollection: (
+    deleteItems: (
         databaseName: string,
         collectionName: string,
         querystring: string

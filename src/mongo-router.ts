@@ -29,13 +29,9 @@ export async function deleteDatabaseRoute(ctx: Koa.Context) {
 }
 
 // TODO queryString support for $explain
-export async function getCollectionRoute(ctx: Koa.Context) {
+export async function getItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const result = await databaseFunctions.getCollectionStream(
-        params.database,
-        params.collection,
-        ctx.request.querystring
-    )
+    const result = await databaseFunctions.getItemsStream(params.database, params.collection, ctx.request.querystring)
 
     if (result.count != undefined) {
         ctx.set('X-Total-Count', result.count.toString())
@@ -46,14 +42,14 @@ export async function getCollectionRoute(ctx: Koa.Context) {
     ctx.body = stream
 }
 
-export interface IPutCollectionResponse {
+export interface IPutItemsResponse {
     inserted: string[]
     modified: string[]
     unchanged: string[]
     deleted: string[]
     failed: string[]
 }
-export async function putCollectionRoute(ctx: Koa.Context) {
+export async function putItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
     const collection = await getDatabaseCollection(params.database, params.collection)
     const query = parseQueryString(ctx.request.querystring)
@@ -163,7 +159,7 @@ export async function putCollectionRoute(ctx: Koa.Context) {
         .toArray()).map(item => item._id)
     await collection.deleteMany({ _id: { $in: deleteIDs } })
 
-    const response: IPutCollectionResponse = {
+    const response: IPutItemsResponse = {
         inserted: insertedIDs.map(id => id.toHexString()),
         modified: modifiedIDs.map(id => id.toHexString()),
         unchanged: unchangedIDs.map(id => id.toHexString()),
@@ -173,22 +169,22 @@ export async function putCollectionRoute(ctx: Koa.Context) {
     ctx.body = response
 }
 
-export async function postCollectionRoute(ctx: Koa.Context) {
+export async function postItemsRoute(ctx: Koa.Context) {
     const body = ctx.request.body
     ctx.assert(typeof body !== 'string', 400, 'body must be json object')
     ctx.assert(!Array.isArray(body), 400, 'body must be json object')
     ctx.assert(body._id === undefined, 400, 'body cannot contain an _id')
 
     const params: IParams = ctx.state
-    const result = await databaseFunctions.postCollection(params.database, params.collection, ctx.request.body)
+    const result = await databaseFunctions.postItems(params.database, params.collection, ctx.request.body)
     ctx.status = result.status
     ctx.body = result
 }
 
-export async function patchCollectionRoute(ctx: Koa.Context) {
+export async function patchItemsRoute(ctx: Koa.Context) {
     ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
     const params: IParams = ctx.state
-    const result = await databaseFunctions.patchCollection(
+    const result = await databaseFunctions.patchItems(
         params.database,
         params.collection,
         convertPatch(ctx.request.body),
@@ -201,9 +197,9 @@ export async function patchCollectionRoute(ctx: Koa.Context) {
     }
 }
 
-export async function deleteCollectionRoute(ctx: Koa.Context) {
+export async function deleteItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const result = await databaseFunctions.deleteCollection(params.database, params.collection, ctx.request.querystring)
+    const result = await databaseFunctions.deleteItems(params.database, params.collection, ctx.request.querystring)
     ctx.status = result.status
     ctx.body = result
 }
@@ -377,11 +373,11 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
                 }
                 await next()
             })
-            .get('/:collection', permissionCheck, getCollectionRoute)
-            .put('/:collection', permissionCheck, putCollectionRoute)
-            .post('/:collection', permissionCheck, bodyParser, postCollectionRoute)
-            .patch('/:collection', permissionCheck, bodyParser, patchCollectionRoute)
-            .delete('/:collection', permissionCheck, deleteCollectionRoute)
+            .get('/:collection', permissionCheck, getItemsRoute)
+            .put('/:collection', permissionCheck, putItemsRoute)
+            .post('/:collection', permissionCheck, bodyParser, postItemsRoute)
+            .patch('/:collection', permissionCheck, bodyParser, patchItemsRoute)
+            .delete('/:collection', permissionCheck, deleteItemsRoute)
             .get('/:collection/schema', permissionCheck, getSchemaRoute)
             .put('/:collection/schema', permissionCheck, bodyParser, putSchemaRoute)
             .delete('/:collection/schema', permissionCheck, deleteSchemaRoute)
@@ -400,11 +396,11 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
             })
             .get('/:database', permissionCheck, getDatabaseRoute)
             .delete('/:database', permissionCheck, deleteDatabaseRoute)
-            .get('/:database/:collection', permissionCheck, getCollectionRoute)
-            .put('/:database/:collection', permissionCheck, putCollectionRoute)
-            .post('/:database/:collection', permissionCheck, bodyParser, postCollectionRoute)
-            .patch('/:database/:collection', permissionCheck, bodyParser, patchCollectionRoute)
-            .delete('/:database/:collection', permissionCheck, deleteCollectionRoute)
+            .get('/:database/:collection', permissionCheck, getItemsRoute)
+            .put('/:database/:collection', permissionCheck, putItemsRoute)
+            .post('/:database/:collection', permissionCheck, bodyParser, postItemsRoute)
+            .patch('/:database/:collection', permissionCheck, bodyParser, patchItemsRoute)
+            .delete('/:database/:collection', permissionCheck, deleteItemsRoute)
             .get('/:database/:collection/schema', permissionCheck, getSchemaRoute)
             .put('/:database/:collection/schema', permissionCheck, bodyParser, putSchemaRoute)
             .delete('/:database/:collection/schema', permissionCheck, deleteSchemaRoute)

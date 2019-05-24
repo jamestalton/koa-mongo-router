@@ -4,11 +4,11 @@ import { getDatabase, getDatabaseCollection } from './mongo'
 import { IMongoQuery, parseQueryString } from './query-string'
 
 export const mongoDatabaseFunctions: IDatabaseFunctions = {
-    getCollectionStream,
-    getCollection,
-    postCollection,
-    patchCollection,
-    deleteCollection,
+    getItemsStream,
+    getItems,
+    postItems,
+    patchItems,
+    deleteItems,
     getItem,
     putItem,
     putItemOnlyIfAlreadyExists,
@@ -17,7 +17,7 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     deleteItem
 }
 
-async function getCollectionCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
+async function getItemsCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
 
     // if query includes "invalid" or "valid" get collection schema to only return valid or invalid items
@@ -60,9 +60,9 @@ async function getCollectionCursor(databaseName: string, collectionName: string,
     return cursor
 }
 
-async function getCollectionStream(databaseName: string, collectionName: string, querystring: string) {
+async function getItemsStream(databaseName: string, collectionName: string, querystring: string) {
     const query = parseQueryString(querystring)
-    const cursor = await getCollectionCursor(databaseName, collectionName, query)
+    const cursor = await getItemsCursor(databaseName, collectionName, query)
 
     let count: number
     if (query.count === true) {
@@ -81,9 +81,9 @@ async function getCollectionStream(databaseName: string, collectionName: string,
     }
 }
 
-async function getCollection(databaseName: string, collectionName: string, querystring: string) {
+async function getItems(databaseName: string, collectionName: string, querystring: string) {
     const query = parseQueryString(querystring)
-    const cursor = await getCollectionCursor(databaseName, collectionName, query)
+    const cursor = await getItemsCursor(databaseName, collectionName, query)
 
     let count: number
     if (query.count === true) {
@@ -96,7 +96,7 @@ async function getCollection(databaseName: string, collectionName: string, query
     }
 }
 
-async function postCollection(databaseName: string, collectionName: string, item: any) {
+async function postItems(databaseName: string, collectionName: string, item: any) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const result = await collection.insertOne(item)
     return {
@@ -105,7 +105,7 @@ async function postCollection(databaseName: string, collectionName: string, item
     }
 }
 
-async function patchCollection(databaseName: string, collectionName: string, update: any, querystring: string) {
+async function patchItems(databaseName: string, collectionName: string, update: any, querystring: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const query = parseQueryString(querystring)
     const result = await collection.updateMany(query.filter, update)
@@ -116,7 +116,7 @@ async function patchCollection(databaseName: string, collectionName: string, upd
     }
 }
 
-async function deleteCollection(databaseName: string, collectionName: string, querystring: string) {
+async function deleteItems(databaseName: string, collectionName: string, querystring: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const query = parseQueryString(querystring)
     const result = await collection.deleteMany(query.filter)
