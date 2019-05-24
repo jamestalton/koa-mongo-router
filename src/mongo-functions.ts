@@ -108,7 +108,6 @@ async function postCollection(databaseName: string, collectionName: string, item
 async function patchCollection(databaseName: string, collectionName: string, update: any, querystring: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const query = parseQueryString(querystring)
-    update = convertPatch(update)
     const result = await collection.updateMany(query.filter, update)
     return {
         status: 200,
@@ -181,7 +180,7 @@ async function putItemOnlyIfDoesNotAlreadyExist(databaseName: string, collection
 
 async function patchItem(databaseName: string, collectionName: string, id: string, patch: any) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
-    const result = await collection.updateOne({ _id: new ObjectID(id) }, convertPatch(patch))
+    const result = await collection.updateOne({ _id: new ObjectID(id) }, patch)
     if (result.modifiedCount === 1) {
         return 200
     } else if (result.matchedCount === 1) {
@@ -189,21 +188,6 @@ async function patchItem(databaseName: string, collectionName: string, id: strin
     } else {
         return 404
     }
-}
-
-function convertPatch(patch: any) {
-    const convertedPatch: any = {}
-    for (const key of Object.keys(patch)) {
-        if (key.startsWith('$')) {
-            convertedPatch[key] = patch[key]
-        } else {
-            if (convertedPatch.$set == undefined) {
-                convertedPatch.$set = {}
-            }
-            convertedPatch.$set[key] = patch[key]
-        }
-    }
-    return convertedPatch
 }
 
 async function deleteItem(databaseName: string, collectionName: string, id: string) {

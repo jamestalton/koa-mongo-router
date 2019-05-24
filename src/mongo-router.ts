@@ -191,7 +191,7 @@ export async function patchCollectionRoute(ctx: Koa.Context) {
     const result = await databaseFunctions.patchCollection(
         params.database,
         params.collection,
-        ctx.request.body,
+        convertPatch(ctx.request.body),
         ctx.request.querystring
     )
     ctx.status = result.status
@@ -254,7 +254,12 @@ export async function putItemRoute(ctx: Koa.Context) {
 export async function patchItemRoute(ctx: Koa.Context) {
     ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
     const params: IParams = ctx.state
-    ctx.status = await databaseFunctions.patchItem(params.database, params.collection, params.id, ctx.request.body)
+    ctx.status = await databaseFunctions.patchItem(
+        params.database,
+        params.collection,
+        params.id,
+        convertPatch(ctx.request.body)
+    )
     if (ctx.status !== 404 && ctx.status !== 204) {
         ctx.body = emptyObject
     }
