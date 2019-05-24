@@ -3,9 +3,9 @@ import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
 import { ObjectID } from 'mongodb'
 import { IDatabaseFunctions } from './database-functions'
+import { getDatabase, getDatabaseCollection } from './mongo'
 import { mongoDatabaseFunctions } from './mongo-functions'
 import { parseQueryString } from './query-string'
-import { getDatabase, getDatabaseCollection } from './utils/mongo'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}

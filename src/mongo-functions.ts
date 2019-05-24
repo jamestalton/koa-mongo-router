@@ -1,7 +1,7 @@
 import { ObjectID } from 'mongodb'
 import { IDatabaseFunctions } from './database-functions'
+import { getDatabase, getDatabaseCollection } from './mongo'
 import { IMongoQuery, parseQueryString } from './query-string'
-import { getDatabase, getDatabaseCollection } from './utils/mongo'
 
 export const mongoDatabaseFunctions: IDatabaseFunctions = {
     getCollectionStream,
