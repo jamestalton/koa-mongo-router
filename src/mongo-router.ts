@@ -2,7 +2,7 @@ import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
 import { ObjectID } from 'mongodb'
-import { IDatabaseFunctions } from './database-functions'
+import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getDatabase, getDatabaseCollection } from './mongo'
 import { mongoDatabaseFunctions } from './mongo-functions'
 import { parseQueryString } from './query-string'
@@ -42,13 +42,6 @@ export async function getItemsRoute(ctx: Koa.Context) {
     ctx.body = stream
 }
 
-export interface IPutItemsResponse {
-    inserted: string[]
-    modified: string[]
-    unchanged: string[]
-    deleted: string[]
-    failed: string[]
-}
 export async function putItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
     const collection = await getDatabaseCollection(params.database, params.collection)
