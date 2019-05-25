@@ -7,6 +7,9 @@ import { IMongoQuery, parseQueryString } from './query-string'
 const JSONStream = require('JSONStream') // tslint:disable-line
 
 export const mongoDatabaseFunctions: IDatabaseFunctions = {
+    getDatabases,
+    getDatabaseCollections,
+    deleteDatabase,
     getItemsStream,
     getItems,
     putItems,
@@ -19,7 +22,33 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     putItemOnlyIfAlreadyExists,
     putItemOnlyIfDoesNotAlreadyExist,
     patchItem,
-    deleteItem
+    deleteItem,
+    getSchema,
+    putSchema,
+    deleteSchema
+}
+
+async function getDatabases() {
+    const db = await getDatabase('admin')
+    return db.admin().listDatabases()
+}
+
+async function getDatabaseCollections(databaseName: string) {
+    const db = await getDatabase(databaseName)
+    const collections = await db.collections()
+    return Promise.all(
+        collections.map(async collection => {
+            return {
+                ...{ name: collection.collectionName },
+                ...(await collection.stats())
+            }
+        })
+    )
+}
+
+async function deleteDatabase(databaseName: string) {
+    const db = await getDatabase(databaseName)
+    return db.dropDatabase()
 }
 
 async function getItemsCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
@@ -336,6 +365,64 @@ async function deleteItem(databaseName: string, collectionName: string, id: stri
     if (result.deletedCount === 1) {
         return 200
     } else {
+        return 404
+    }
+}
+
+async function getSchema(databaseName: string, collectionName: string) {
+    const db = await getDatabase(databaseName)
+    const collectionInfos = await db.listCollections({ name: collectionName }).toArray()
+    if (
+        collectionInfos.length === 1 &&
+        collectionInfos[0].options != undefined &&
+        collectionInfos[0].options.validator != undefined
+    ) {
+        return {
+            status: 200,
+            schema: collectionInfos[0].options.validator.$jsonSchema
+        }
+    } else {
+        return {
+            status: 404
+        }
+    }
+}
+
+async function putSchema(databaseName: string, collectionName: string, schema: any) {
+    const db = await getDatabase(databaseName)
+    await db.createCollection(collectionName)
+    try {
+        const result = await db.command({
+            collMod: collectionName,
+            validator: {
+                $jsonSchema: schema
+            },
+            validationLevel: 'strict',
+            validationAction: 'error'
+        })
+        return {
+            status: 200,
+            result
+        }
+    } catch (err) {
+        return {
+            status: 400,
+            error: err.message
+        }
+    }
+}
+
+async function deleteSchema(databaseName: string, collectionName: string) {
+    const db = await getDatabase(databaseName)
+    try {
+        const result = await db.command({
+            collMod: collectionName,
+            validator: {},
+            validationLevel: 'off',
+            validationAction: 'warn'
+        })
+        return 200
+    } catch {
         return 404
     }
 }

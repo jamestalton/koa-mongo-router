@@ -2,35 +2,31 @@ import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
 import { IDatabaseFunctions } from './database-functions'
-import { getDatabase } from './mongo'
 import { mongoDatabaseFunctions } from './mongo-functions'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
+
 export let databaseFunctions: IDatabaseFunctions = mongoDatabaseFunctions
 
-export async function getDatabaseRoute(ctx: Koa.Context) {
+export async function getDatabasesRoute(ctx: Koa.Context) {
+    ctx.body = await databaseFunctions.getDatabases()
+}
+
+export async function getDatabaseCollectionsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const db = await getDatabase(params.database)
-    ctx.body = {
-        collectionNames: Object.keys(db.collections)
-    }
+    ctx.body = await databaseFunctions.getDatabaseCollections(params.database)
 }
 
 export async function deleteDatabaseRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const db = await getDatabase(params.database)
-    await db.dropDatabase()
-    ctx.body = {
-        message: 'Database deleted'
-    }
+    ctx.body = await databaseFunctions.deleteDatabase(params.database)
 }
 
 // TODO queryString support for $explain
 export async function getItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
     const result = await databaseFunctions.getItemsStream(params.database, params.collection, ctx.request.querystring)
-
     if (result.count != undefined) {
         ctx.set('X-Total-Count', result.count.toString())
     }
@@ -59,7 +55,6 @@ export async function postItemsRoute(ctx: Koa.Context) {
     ctx.assert(typeof body !== 'string', 400, 'body must be json object')
     ctx.assert(!Array.isArray(body), 400, 'body must be json object')
     ctx.assert(body._id === undefined, 400, 'body cannot contain an _id')
-
     const params: IParams = ctx.state
     const result = await databaseFunctions.postItems(params.database, params.collection, ctx.request.body)
     ctx.status = result.status
@@ -171,51 +166,27 @@ export async function deleteItemRoute(ctx: Koa.Context) {
 
 export async function getSchemaRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const db = await getDatabase(params.database)
-    const collectionInfos = await db.listCollections({ name: params.collection }).toArray()
-    if (
-        collectionInfos.length === 1 &&
-        collectionInfos[0].options != undefined &&
-        collectionInfos[0].options.validator != undefined
-    ) {
-        ctx.body = collectionInfos[0].options.validator.$jsonSchema
+    const result = await databaseFunctions.getSchema(params.database, params.collection)
+    ctx.status = result.status
+    if (result.schema != undefined) {
+        ctx.body = result.schema
     }
 }
 
 export async function putSchemaRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const db = await getDatabase(params.database)
-    try {
-        const result = await db.command({
-            collMod: params.collection,
-            validator: {
-                $jsonSchema: ctx.request.body
-            },
-            validationLevel: 'strict',
-            validationAction: 'error'
-        })
-        ctx.body = result
-    } catch (err) {
-        ctx.status = 400
-        ctx.body = {
-            error: err.message
-        }
+    const result = await databaseFunctions.putSchema(params.database, params.collection, ctx.request.body)
+    ctx.status = result.status
+    if (ctx.status !== 404 && ctx.status !== 204) {
+        ctx.body = ctx.status
     }
 }
 
 export async function deleteSchemaRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const db = await getDatabase(params.database)
-    try {
-        const result = await db.command({
-            collMod: params.collection,
-            validator: emptyObject,
-            validationLevel: 'off',
-            validationAction: 'warn'
-        })
-        ctx.body = result
-    } catch {
-        ctx.status = 404
+    ctx.status = await databaseFunctions.deleteSchema(params.database, params.collection)
+    if (ctx.status !== 404 && ctx.status !== 204) {
+        ctx.body = {}
     }
 }
 
@@ -249,7 +220,7 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
                 ctx.state.database = options.database
                 await next()
             })
-            .get('/', permissionCheck, getDatabaseRoute)
+            .get('/', permissionCheck, getDatabaseCollectionsRoute)
             .delete('/', permissionCheck, deleteDatabaseRoute)
             .param('collection', async (collection: string, ctx: Koa.Context, next: () => Promise<any>) => {
                 ctx.state = {
@@ -279,7 +250,8 @@ export function getMongoRouter(options?: IMongoRouterOptions) {
                 }
                 await next()
             })
-            .get('/:database', permissionCheck, getDatabaseRoute)
+            .get('/', permissionCheck, getDatabasesRoute)
+            .get('/:database', permissionCheck, getDatabaseCollectionsRoute)
             .delete('/:database', permissionCheck, deleteDatabaseRoute)
             .get('/:database/:collection', permissionCheck, getItemsRoute)
             .put('/:database/:collection', permissionCheck, putItemsRoute)

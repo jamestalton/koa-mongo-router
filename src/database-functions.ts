@@ -9,6 +9,12 @@ export interface IPutItemsResponse {
 }
 
 export interface IDatabaseFunctions {
+    getDatabases: () => Promise<string[]>
+
+    getDatabaseCollections: (databaseName: string) => Promise<any[]>
+
+    deleteDatabase: (databaseName: string) => Promise<number>
+
     getItemsStream: (
         databaseName: string,
         collectionName: string,
@@ -82,4 +88,24 @@ export interface IDatabaseFunctions {
     patchItem: (databaseName: string, collectionName: string, id: string, patch: any) => Promise<number>
 
     deleteItem: (databaseName: string, collectionName: string, id: string) => Promise<number>
+
+    getSchema: (
+        databaseName: string,
+        collectionName: string
+    ) => Promise<{
+        status: number
+        schema?: any
+    }>
+
+    putSchema: (
+        databaseName: string,
+        collectionName: string,
+        schema: any
+    ) => Promise<{
+        status: number
+        result?: any
+        error?: string
+    }>
+
+    deleteSchema: (databaseName: string, collectionName: string) => Promise<number>
 }

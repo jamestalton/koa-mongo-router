@@ -20,8 +20,7 @@ beforeAll(async function() {
 })
 
 beforeEach(async () => {
-    await request.delete(`/${database}/${collection}/schema`)
-    await request.delete(`/${database}/${collection}`)
+    await request.delete(`/${database}`)
 })
 
 afterAll(async function() {
