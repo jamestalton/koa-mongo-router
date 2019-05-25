@@ -1,3 +1,5 @@
+import { Readable } from 'stream'
+
 export interface IPutItemsResponse {
     inserted: string[]
     modified: string[]
@@ -23,6 +25,26 @@ export interface IDatabaseFunctions {
     ) => Promise<{
         count: number
         items: any[]
+    }>
+
+    putItems: (
+        databaseName: string,
+        collectionName: string,
+        querystring: string,
+        items: any[]
+    ) => Promise<{
+        status: number
+        response?: IPutItemsResponse
+    }>
+
+    putItemsStream: (
+        databaseName: string,
+        collectionName: string,
+        querystring: string,
+        inputStream: Readable
+    ) => Promise<{
+        status: number
+        response?: IPutItemsResponse
     }>
 
     postItems: (databaseName: string, collectionName: string, item: any) => Promise<{ status: number; _id: string }>

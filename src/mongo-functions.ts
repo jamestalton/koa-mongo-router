@@ -1,11 +1,16 @@
 import { ObjectID } from 'mongodb'
-import { IDatabaseFunctions } from './database-functions'
+import { Duplex, Readable, Writable } from 'stream'
+import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getDatabase, getDatabaseCollection } from './mongo'
 import { IMongoQuery, parseQueryString } from './query-string'
+
+const JSONStream = require('JSONStream') // tslint:disable-line
 
 export const mongoDatabaseFunctions: IDatabaseFunctions = {
     getItemsStream,
     getItems,
+    putItems,
+    putItemsStream,
     postItems,
     patchItems,
     deleteItems,
@@ -93,6 +98,141 @@ async function getItems(databaseName: string, collectionName: string, querystrin
     return {
         count,
         items: await cursor.toArray()
+    }
+}
+
+async function putItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {
+    const stream: Duplex = new Duplex()
+    stream.write(JSON.stringify(items))
+    return putItemsStream(databaseName, collectionName, querystring, stream)
+}
+
+async function putItemsStream(
+    databaseName: string,
+    collectionName: string,
+    querystring: string,
+    inputStream: Readable
+) {
+    const collection = await getDatabaseCollection(databaseName, collectionName)
+    const query = parseQueryString(querystring)
+
+    const objectIDs: ObjectID[] = []
+    const modifiedIDs: ObjectID[] = []
+    const insertedIDs: ObjectID[] = []
+    const unchangedIDs: ObjectID[] = []
+    const failedIDs: ObjectID[] = []
+    const promises: Array<Promise<any>> = []
+    const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
+    let activeCount = 0
+    let paused = false
+    try {
+        await new Promise((resolve, reject) => {
+            const jsonStream = JSONStream.parse('*')
+                .on('data', async function(item: any) {
+                    if (typeof item === 'string') {
+                        reject(new Error('Bad Request'))
+                        return
+                    }
+
+                    if (item._id != undefined) {
+                        item._id = new ObjectID(item._id)
+                        objectIDs.push(item._id)
+
+                        promises.push(
+                            collection
+                                .replaceOne({ _id: item._id }, item, {
+                                    upsert: true
+                                })
+                                .then(result => {
+                                    if (result.upsertedCount === 1) {
+                                        insertedIDs.push(item._id)
+                                    } else if (result.modifiedCount === 1) {
+                                        modifiedIDs.push(item._id)
+                                    } else {
+                                        unchangedIDs.push(item._id)
+                                    }
+                                })
+                                .catch(() => {
+                                    failedIDs.push(item._id)
+                                })
+                                .finally(() => {
+                                    activeCount--
+                                    if (paused) {
+                                        paused = false
+                                        jsonStream.resume()
+                                    }
+                                })
+                        )
+                    } else {
+                        promises.push(
+                            collection
+                                .insertOne(item)
+                                .then(result => {
+                                    insertedIDs.push(result.insertedId)
+                                    objectIDs.push(result.insertedId)
+                                })
+                                .catch(() => {
+                                    failedIDs.push(item._id)
+                                })
+                                .finally(() => {
+                                    activeCount--
+                                    if (paused) {
+                                        paused = false
+                                        jsonStream.resume()
+                                    }
+                                })
+                        )
+                    }
+
+                    activeCount++
+                    if (activeCount >= maxAsyncCalls) {
+                        paused = true
+                        jsonStream.pause()
+                    }
+                })
+                .on(
+                    'error',
+                    /* istanbul ignore next */
+                    function(err: Error) {
+                        reject(err)
+                    }
+                )
+                .on('end', function() {
+                    resolve()
+                })
+
+            inputStream.pipe(jsonStream)
+        })
+    } catch (err) {
+        return {
+            status: 400
+        }
+    }
+    await Promise.all(promises)
+
+    let deleteFilter: any = { _id: { $nin: objectIDs } }
+    if (query.filter && Object.keys(query.filter).length > 0) {
+        deleteFilter = {
+            $and: [query.filter, deleteFilter]
+        }
+    }
+    const deleteIDs = (await collection
+        .find(deleteFilter)
+        .project({ _id: 1 })
+        .toArray()).map(item => item._id)
+    await collection.deleteMany({ _id: { $in: deleteIDs } })
+
+    const response: IPutItemsResponse = {
+        inserted: insertedIDs.map(id => id.toHexString()),
+        modified: modifiedIDs.map(id => id.toHexString()),
+        unchanged: unchangedIDs.map(id => id.toHexString()),
+        deleted: deleteIDs.map(id => id.toHexString()),
+        failed: failedIDs.map(id => id.toHexString())
+    }
+
+    return {
+        status: 200,
+        response
     }
 }
 

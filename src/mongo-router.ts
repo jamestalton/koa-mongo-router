@@ -1,11 +1,9 @@
 import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
-import { ObjectID } from 'mongodb'
-import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
-import { getDatabase, getDatabaseCollection } from './mongo'
+import { IDatabaseFunctions } from './database-functions'
+import { getDatabase } from './mongo'
 import { mongoDatabaseFunctions } from './mongo-functions'
-import { parseQueryString } from './query-string'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
@@ -44,122 +42,16 @@ export async function getItemsRoute(ctx: Koa.Context) {
 
 export async function putItemsRoute(ctx: Koa.Context) {
     const params: IParams = ctx.state
-    const collection = await getDatabaseCollection(params.database, params.collection)
-    const query = parseQueryString(ctx.request.querystring)
-
-    const objectIDs: ObjectID[] = []
-    const modifiedIDs: ObjectID[] = []
-    const insertedIDs: ObjectID[] = []
-    const unchangedIDs: ObjectID[] = []
-    const failedIDs: ObjectID[] = []
-    const promises: Array<Promise<any>> = []
-    const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
-    let activeCount = 0
-    let paused = false
-    try {
-        await new Promise((resolve, reject) => {
-            const jsonStream = JSONStream.parse('*')
-                .on('data', async function(item: any) {
-                    if (typeof item === 'string') {
-                        reject(new Error('Bad Request'))
-                        return
-                    }
-
-                    if (item._id != undefined) {
-                        item._id = new ObjectID(item._id)
-                        objectIDs.push(item._id)
-
-                        promises.push(
-                            collection
-                                .replaceOne({ _id: item._id }, item, {
-                                    upsert: true
-                                })
-                                .then(result => {
-                                    if (result.upsertedCount === 1) {
-                                        insertedIDs.push(item._id)
-                                    } else if (result.modifiedCount === 1) {
-                                        modifiedIDs.push(item._id)
-                                    } else {
-                                        unchangedIDs.push(item._id)
-                                    }
-                                })
-                                .catch(() => {
-                                    failedIDs.push(item._id)
-                                })
-                                .finally(() => {
-                                    activeCount--
-                                    if (paused) {
-                                        paused = false
-                                        jsonStream.resume()
-                                    }
-                                })
-                        )
-                    } else {
-                        promises.push(
-                            collection
-                                .insertOne(item)
-                                .then(result => {
-                                    insertedIDs.push(result.insertedId)
-                                    objectIDs.push(result.insertedId)
-                                })
-                                .catch(() => {
-                                    failedIDs.push(item._id)
-                                })
-                                .finally(() => {
-                                    activeCount--
-                                    if (paused) {
-                                        paused = false
-                                        jsonStream.resume()
-                                    }
-                                })
-                        )
-                    }
-
-                    activeCount++
-                    if (activeCount >= maxAsyncCalls) {
-                        paused = true
-                        jsonStream.pause()
-                    }
-                })
-                .on(
-                    'error',
-                    /* istanbul ignore next */
-                    function(err: Error) {
-                        reject(err)
-                    }
-                )
-                .on('end', function() {
-                    resolve()
-                })
-
-            ctx.req.pipe(jsonStream)
-        })
-    } catch (err) {
-        ctx.status = 400
-        return
+    const result = await databaseFunctions.putItemsStream(
+        params.database,
+        params.collection,
+        ctx.request.querystring,
+        ctx.req
+    )
+    ctx.status = result.status
+    if (result.response != undefined) {
+        ctx.body = result.response
     }
-    await Promise.all(promises)
-
-    let deleteFilter: any = { _id: { $nin: objectIDs } }
-    if (query.filter && Object.keys(query.filter).length > 0) {
-        deleteFilter = {
-            $and: [query.filter, deleteFilter]
-        }
-    }
-    const deleteIDs = (await collection
-        .find(deleteFilter)
-        .project({ _id: 1 })
-        .toArray()).map(item => item._id)
-    await collection.deleteMany({ _id: { $in: deleteIDs } })
-
-    const response: IPutItemsResponse = {
-        inserted: insertedIDs.map(id => id.toHexString()),
-        modified: modifiedIDs.map(id => id.toHexString()),
-        unchanged: unchangedIDs.map(id => id.toHexString()),
-        deleted: deleteIDs.map(id => id.toHexString()),
-        failed: failedIDs.map(id => id.toHexString())
-    }
-    ctx.body = response
 }
 
 export async function postItemsRoute(ctx: Koa.Context) {
