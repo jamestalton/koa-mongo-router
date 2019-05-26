@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb'
-import { Duplex, Readable, Writable } from 'stream'
+import { Duplex, Readable } from 'stream'
 import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getDatabase, getDatabaseCollection } from './mongo'
 import { IMongoQuery, parseQueryString } from './query-string'
@@ -10,22 +10,22 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     getDatabases,
     getDatabaseCollections,
     deleteDatabase,
-    getItemsStream,
-    getItems,
-    putItems,
-    putItemsStream,
-    postItems,
-    patchItems,
-    deleteItems,
-    getItem,
-    putItem,
-    putItemOnlyIfAlreadyExists,
-    putItemOnlyIfDoesNotAlreadyExist,
-    patchItem,
-    deleteItem,
-    getSchema,
-    putSchema,
-    deleteSchema
+    getCollectionItemsStream,
+    getCollectionItems,
+    putCollectionItems,
+    putCollectionItemsStream,
+    postCollectionItems,
+    patchCollectionItems,
+    deleteCollectionItems,
+    getCollectionItem,
+    putCollectionItem,
+    putCollectionItemOnlyIfAlreadyExists,
+    putCollectionItemOnlyIfDoesNotAlreadyExist,
+    patchCollectionItem,
+    deleteCollectionItem,
+    getCollectionSchema,
+    putCollectionSchema,
+    deleteCollectionSchema
 }
 
 async function getDatabases() {
@@ -51,7 +51,7 @@ async function deleteDatabase(databaseName: string) {
     return db.dropDatabase()
 }
 
-async function getItemsCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
+async function getCollectionItemsCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
 
     // if query includes "invalid" or "valid" get collection schema to only return valid or invalid items
@@ -94,9 +94,9 @@ async function getItemsCursor(databaseName: string, collectionName: string, quer
     return cursor
 }
 
-async function getItemsStream(databaseName: string, collectionName: string, querystring: string) {
+async function getCollectionItemsStream(databaseName: string, collectionName: string, querystring: string) {
     const query = parseQueryString(querystring)
-    const cursor = await getItemsCursor(databaseName, collectionName, query)
+    const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
 
     let count: number
     if (query.count === true) {
@@ -115,9 +115,9 @@ async function getItemsStream(databaseName: string, collectionName: string, quer
     }
 }
 
-async function getItems(databaseName: string, collectionName: string, querystring: string) {
+async function getCollectionItems(databaseName: string, collectionName: string, querystring: string) {
     const query = parseQueryString(querystring)
-    const cursor = await getItemsCursor(databaseName, collectionName, query)
+    const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
 
     let count: number
     if (query.count === true) {
@@ -130,13 +130,13 @@ async function getItems(databaseName: string, collectionName: string, querystrin
     }
 }
 
-async function putItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {
+async function putCollectionItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {
     const stream: Duplex = new Duplex()
     stream.write(JSON.stringify(items))
-    return putItemsStream(databaseName, collectionName, querystring, stream)
+    return putCollectionItemsStream(databaseName, collectionName, querystring, stream)
 }
 
-async function putItemsStream(
+async function putCollectionItemsStream(
     databaseName: string,
     collectionName: string,
     querystring: string,
@@ -265,7 +265,7 @@ async function putItemsStream(
     }
 }
 
-async function postItems(databaseName: string, collectionName: string, item: any) {
+async function postCollectionItems(databaseName: string, collectionName: string, item: any) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const result = await collection.insertOne(item)
     return {
@@ -274,7 +274,7 @@ async function postItems(databaseName: string, collectionName: string, item: any
     }
 }
 
-async function patchItems(databaseName: string, collectionName: string, update: any, querystring: string) {
+async function patchCollectionItems(databaseName: string, collectionName: string, update: any, querystring: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const query = parseQueryString(querystring)
     const result = await collection.updateMany(query.filter, update)
@@ -285,7 +285,7 @@ async function patchItems(databaseName: string, collectionName: string, update: 
     }
 }
 
-async function deleteItems(databaseName: string, collectionName: string, querystring: string) {
+async function deleteCollectionItems(databaseName: string, collectionName: string, querystring: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const query = parseQueryString(querystring)
     const result = await collection.deleteMany(query.filter)
@@ -295,7 +295,7 @@ async function deleteItems(databaseName: string, collectionName: string, queryst
     }
 }
 
-async function getItem(databaseName: string, collectionName: string, id: string) {
+async function getCollectionItem(databaseName: string, collectionName: string, id: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const item = await collection.findOne({ _id: new ObjectID(id) })
     if (item == undefined) {
@@ -310,7 +310,7 @@ async function getItem(databaseName: string, collectionName: string, id: string)
     }
 }
 
-async function putItem(databaseName: string, collectionName: string, id: string, item: any) {
+async function putCollectionItem(databaseName: string, collectionName: string, id: string, item: any) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     item._id = new ObjectID(id)
     const result = await collection.replaceOne({ _id: item._id }, item, { upsert: true })
@@ -322,7 +322,12 @@ async function putItem(databaseName: string, collectionName: string, id: string,
         return 204
     }
 }
-async function putItemOnlyIfAlreadyExists(databaseName: string, collectionName: string, id: string, item: any) {
+async function putCollectionItemOnlyIfAlreadyExists(
+    databaseName: string,
+    collectionName: string,
+    id: string,
+    item: any
+) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     item._id = new ObjectID(id)
     const result = await collection.replaceOne({ _id: item._id }, item, {
@@ -336,7 +341,12 @@ async function putItemOnlyIfAlreadyExists(databaseName: string, collectionName: 
         return 412
     }
 }
-async function putItemOnlyIfDoesNotAlreadyExist(databaseName: string, collectionName: string, id: string, item: any) {
+async function putCollectionItemOnlyIfDoesNotAlreadyExist(
+    databaseName: string,
+    collectionName: string,
+    id: string,
+    item: any
+) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     item._id = new ObjectID(id)
     const result = await collection.updateOne({ _id: new ObjectID(id) }, { $setOnInsert: item }, { upsert: true })
@@ -347,7 +357,7 @@ async function putItemOnlyIfDoesNotAlreadyExist(databaseName: string, collection
     }
 }
 
-async function patchItem(databaseName: string, collectionName: string, id: string, patch: any) {
+async function patchCollectionItem(databaseName: string, collectionName: string, id: string, patch: any) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const result = await collection.updateOne({ _id: new ObjectID(id) }, patch)
     if (result.modifiedCount === 1) {
@@ -359,7 +369,7 @@ async function patchItem(databaseName: string, collectionName: string, id: strin
     }
 }
 
-async function deleteItem(databaseName: string, collectionName: string, id: string) {
+async function deleteCollectionItem(databaseName: string, collectionName: string, id: string) {
     const collection = await getDatabaseCollection(databaseName, collectionName)
     const result = await collection.deleteOne({ _id: new ObjectID(id) })
     if (result.deletedCount === 1) {
@@ -369,7 +379,7 @@ async function deleteItem(databaseName: string, collectionName: string, id: stri
     }
 }
 
-async function getSchema(databaseName: string, collectionName: string) {
+async function getCollectionSchema(databaseName: string, collectionName: string) {
     const db = await getDatabase(databaseName)
     const collectionInfos = await db.listCollections({ name: collectionName }).toArray()
     if (
@@ -388,7 +398,7 @@ async function getSchema(databaseName: string, collectionName: string) {
     }
 }
 
-async function putSchema(databaseName: string, collectionName: string, schema: any) {
+async function putCollectionSchema(databaseName: string, collectionName: string, schema: any) {
     const db = await getDatabase(databaseName)
     await db.createCollection(collectionName)
     try {
@@ -412,10 +422,10 @@ async function putSchema(databaseName: string, collectionName: string, schema: a
     }
 }
 
-async function deleteSchema(databaseName: string, collectionName: string) {
+async function deleteCollectionSchema(databaseName: string, collectionName: string) {
     const db = await getDatabase(databaseName)
     try {
-        const result = await db.command({
+        await db.command({
             collMod: collectionName,
             validator: {},
             validationLevel: 'off',

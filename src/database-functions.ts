@@ -15,7 +15,7 @@ export interface IDatabaseFunctions {
 
     deleteDatabase: (databaseName: string) => Promise<number>
 
-    getItemsStream: (
+    getCollectionItemsStream: (
         databaseName: string,
         collectionName: string,
         querystring: string
@@ -24,7 +24,7 @@ export interface IDatabaseFunctions {
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T
     }>
 
-    getItems: (
+    getCollectionItems: (
         databaseName: string,
         collectionName: string,
         querystring: string
@@ -33,7 +33,7 @@ export interface IDatabaseFunctions {
         items: any[]
     }>
 
-    putItems: (
+    putCollectionItems: (
         databaseName: string,
         collectionName: string,
         querystring: string,
@@ -43,7 +43,7 @@ export interface IDatabaseFunctions {
         response?: IPutItemsResponse
     }>
 
-    putItemsStream: (
+    putCollectionItemsStream: (
         databaseName: string,
         collectionName: string,
         querystring: string,
@@ -53,9 +53,13 @@ export interface IDatabaseFunctions {
         response?: IPutItemsResponse
     }>
 
-    postItems: (databaseName: string, collectionName: string, item: any) => Promise<{ status: number; _id: string }>
+    postCollectionItems: (
+        databaseName: string,
+        collectionName: string,
+        item: any
+    ) => Promise<{ status: number; _id: string }>
 
-    patchItems: (
+    patchCollectionItems: (
         databaseName: string,
         collectionName: string,
         update: any,
@@ -66,30 +70,39 @@ export interface IDatabaseFunctions {
         modifiedCount: number
     }>
 
-    deleteItems: (
+    deleteCollectionItems: (
         databaseName: string,
         collectionName: string,
         querystring: string
     ) => Promise<{ status: number; deletedCount: number }>
 
-    getItem: (databaseName: string, collectionName: string, id: string) => Promise<{ status: number; item?: any }>
+    getCollectionItem: (
+        databaseName: string,
+        collectionName: string,
+        id: string
+    ) => Promise<{ status: number; item?: any }>
 
-    putItem: (databaseName: string, collectionName: string, id: string, item: any) => Promise<number>
+    putCollectionItem: (databaseName: string, collectionName: string, id: string, item: any) => Promise<number>
 
-    putItemOnlyIfAlreadyExists: (databaseName: string, collectionName: string, id: string, item: any) => Promise<number>
-
-    putItemOnlyIfDoesNotAlreadyExist: (
+    putCollectionItemOnlyIfAlreadyExists: (
         databaseName: string,
         collectionName: string,
         id: string,
         item: any
     ) => Promise<number>
 
-    patchItem: (databaseName: string, collectionName: string, id: string, patch: any) => Promise<number>
+    putCollectionItemOnlyIfDoesNotAlreadyExist: (
+        databaseName: string,
+        collectionName: string,
+        id: string,
+        item: any
+    ) => Promise<number>
 
-    deleteItem: (databaseName: string, collectionName: string, id: string) => Promise<number>
+    patchCollectionItem: (databaseName: string, collectionName: string, id: string, patch: any) => Promise<number>
 
-    getSchema: (
+    deleteCollectionItem: (databaseName: string, collectionName: string, id: string) => Promise<number>
+
+    getCollectionSchema: (
         databaseName: string,
         collectionName: string
     ) => Promise<{
@@ -97,7 +110,7 @@ export interface IDatabaseFunctions {
         schema?: any
     }>
 
-    putSchema: (
+    putCollectionSchema: (
         databaseName: string,
         collectionName: string,
         schema: any
@@ -107,5 +120,5 @@ export interface IDatabaseFunctions {
         error?: string
     }>
 
-    deleteSchema: (databaseName: string, collectionName: string) => Promise<number>
+    deleteCollectionSchema: (databaseName: string, collectionName: string) => Promise<number>
 }

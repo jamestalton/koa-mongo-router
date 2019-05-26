@@ -18,11 +18,12 @@
     "types": "lib/index.d.ts",
     "scripts": {
         "build": "rm -rf lib && tsc",
-        "test": "rm -rf coverage && jest",
+        "test": "npm run jest && npm run lint && npm run check",
         "start": "PORT=3000 MAX_WORKERS=2 LOG_LEVEL=debug ts-node-dev --no-notify --respawn example/example.ts",
+        "jest": "rm -rf coverage && jest",
         "lint": "tslint -p . && tslint -p test -c test/tslint.json",
         "lint-fix": "tslint -p . --fix && tslint -p test -c test/tslint.json --fix",
-        "check-format": "prettier --list-different **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
+        "check": "prettier --list-different **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
         "format": "prettier --write **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
         "clean": "rm -rf package-lock.json node_modules lib coverage",
         "update": "npm run clean && ncu -a && npm install && npm test"

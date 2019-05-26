@@ -18,7 +18,7 @@ before_script:
     - mongo --eval 'rs.initiate()'
     - sleep 1
 
-script: npm run test && npm run lint && npm run check-format && npm run build
+script: npm run test && npm run build
 
 after_success: cat coverage/lcov.info | coveralls
 
