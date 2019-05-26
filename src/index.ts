@@ -1,6 +1,7 @@
 export { ILogger, ILogObject, logger } from 'node-server-utils'
 export * from './query-string'
-export * from './mongo-router'
+export * from './database-routes'
+export * from './database-router'
 export * from './mongo-functions'
 export * from './database-functions'
 export * from './utils/koa-error-handler'

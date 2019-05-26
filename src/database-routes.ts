@@ -1,6 +1,4 @@
 import * as Koa from 'koa'
-import * as BodyParser from 'koa-bodyparser'
-import * as Router from 'koa-router'
 import { IDatabaseFunctions } from './database-functions'
 import { mongoDatabaseFunctions } from './mongo-functions'
 
@@ -198,82 +196,8 @@ export async function deleteCollectionSchemaRoute(ctx: Koa.Context) {
     }
 }
 
-interface IParams {
+export interface IParams {
     database: string
     collection: string
     id: string
-}
-
-const bodyParser = BodyParser()
-
-export interface IMongoRouterOptions {
-    permissionCheck?: (ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) => Promise<any>
-    database?: string
-}
-
-export function getMongoRouter(options?: IMongoRouterOptions) {
-    const mongoRouter = new Router()
-
-    async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>) {
-        if (options != undefined && options.permissionCheck != undefined) {
-            await options.permissionCheck(ctx, next, ctx.state.database, ctx.state.collection)
-        } else {
-            await next()
-        }
-    }
-
-    if (options != undefined && options.database != undefined) {
-        mongoRouter
-            .use(async (ctx, next) => {
-                ctx.state.database = options.database
-                await next()
-            })
-            .get('/', permissionCheck, getDatabaseCollectionsRoute)
-            .delete('/', permissionCheck, deleteDatabaseRoute)
-            .param('collection', async (collection: string, ctx: Koa.Context, next: () => Promise<any>) => {
-                ctx.state = {
-                    ...ctx.state,
-                    ...ctx.params
-                }
-                await next()
-            })
-            .get('/:collection', permissionCheck, getCollectionItemsRoute)
-            .put('/:collection', permissionCheck, putCollectionItemsRoute)
-            .post('/:collection', permissionCheck, bodyParser, postCollectionItemsRoute)
-            .patch('/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute)
-            .delete('/:collection', permissionCheck, deleteCollectionItemsRoute)
-            .get('/:collection/schema', permissionCheck, getCollectionSchemaRoute)
-            .put('/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute)
-            .delete('/:collection/schema', permissionCheck, deleteCollectionSchemaRoute)
-            .get('/:collection/:id', permissionCheck, getCollectionItemRoute)
-            .put('/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute)
-            .patch('/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute)
-            .delete('/:collection/:id', permissionCheck, deleteCollectionItemRoute)
-    } else {
-        mongoRouter
-            .param('database', async (database: string, ctx: Koa.Context, next: () => Promise<any>) => {
-                ctx.state = {
-                    ...ctx.state,
-                    ...ctx.params
-                }
-                await next()
-            })
-            .get('/', permissionCheck, getDatabasesRoute)
-            .get('/:database', permissionCheck, getDatabaseCollectionsRoute)
-            .delete('/:database', permissionCheck, deleteDatabaseRoute)
-            .get('/:database/:collection', permissionCheck, getCollectionItemsRoute)
-            .put('/:database/:collection', permissionCheck, putCollectionItemsRoute)
-            .post('/:database/:collection', permissionCheck, bodyParser, postCollectionItemsRoute)
-            .patch('/:database/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute)
-            .delete('/:database/:collection', permissionCheck, deleteCollectionItemsRoute)
-            .get('/:database/:collection/schema', permissionCheck, getCollectionSchemaRoute)
-            .put('/:database/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute)
-            .delete('/:database/:collection/schema', permissionCheck, deleteCollectionSchemaRoute)
-            .get('/:database/:collection/:id', permissionCheck, getCollectionItemRoute)
-            .put('/:database/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute)
-            .patch('/:database/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute)
-            .delete('/:database/:collection/:id', permissionCheck, deleteCollectionItemRoute)
-    }
-
-    return mongoRouter
 }

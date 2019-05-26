@@ -1,7 +1,7 @@
 import { Server } from 'http'
 import * as Koa from 'koa'
 import { createAppServer, shutdownAppServer } from 'node-server-utils' // tslint:disable-line
-import { getMongoRouter, koaErrorHandler, koaLogger } from '../src'
+import { getDatabasesRouter, koaErrorHandler, koaLogger } from '../src'
 import { closeAllMongoConnections } from '../src/mongo'
 
 // Example permission check function
@@ -39,7 +39,7 @@ async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, datab
 let server: Server
 
 export async function startApp() {
-    const mongoRouter = getMongoRouter({
+    const mongoRouter = getDatabasesRouter({
         permissionCheck
     })
 
