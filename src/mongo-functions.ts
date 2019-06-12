@@ -94,7 +94,12 @@ async function getCollectionItemsCursor(databaseName: string, collectionName: st
     return cursor
 }
 
-async function getCollectionItemsStream(databaseName: string, collectionName: string, querystring: string) {
+async function getCollectionItemsStream(
+    databaseName: string,
+    collectionName: string,
+    querystring: string,
+    getItemTransform: (item: any) => any
+) {
     const query = parseQueryString(querystring)
     const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
 
@@ -103,11 +108,20 @@ async function getCollectionItemsStream(databaseName: string, collectionName: st
         count = await cursor.count()
     }
 
-    const pipe: any = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
-        cursor.pipe(
-            destination,
-            options
-        )
+    let pipe: any
+    if (getItemTransform) {
+        pipe = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
+            cursor.stream({ transform: getItemTransform }).pipe(
+                destination,
+                options
+            )
+    } else {
+        pipe = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
+            cursor.pipe(
+                destination,
+                options
+            )
+    }
 
     return {
         count,
@@ -115,7 +129,12 @@ async function getCollectionItemsStream(databaseName: string, collectionName: st
     }
 }
 
-async function getCollectionItems(databaseName: string, collectionName: string, querystring: string) {
+async function getCollectionItems(
+    databaseName: string,
+    collectionName: string,
+    querystring: string,
+    getItemTransform: (item: any) => any
+) {
     const query = parseQueryString(querystring)
     const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
 
@@ -126,7 +145,7 @@ async function getCollectionItems(databaseName: string, collectionName: string, 
 
     return {
         count,
-        items: await cursor.toArray()
+        items: (await cursor.toArray()).map(getItemTransform)
     }
 }
 

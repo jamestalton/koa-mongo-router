@@ -24,7 +24,7 @@ const bodyParser = BodyParser()
 export interface IDatabaseRouterOptions {
     permissionCheck?: (ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) => Promise<any>
     // putItemTransform?: (item: any) => Promise<any>
-    // getItemTransform?: (item: any) => Promise<any>
+    getItemTransform?: (item: any) => any
 }
 
 export function getDatabasesRouter(options?: IDatabaseRouterOptions) {

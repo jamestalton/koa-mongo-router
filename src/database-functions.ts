@@ -18,7 +18,8 @@ export interface IDatabaseFunctions {
     getCollectionItemsStream: (
         databaseName: string,
         collectionName: string,
-        querystring: string
+        querystring: string,
+        getItemTransform: (item: any) => any
     ) => Promise<{
         count: number
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T
@@ -27,7 +28,8 @@ export interface IDatabaseFunctions {
     getCollectionItems: (
         databaseName: string,
         collectionName: string,
-        querystring: string
+        querystring: string,
+        getItemTransform: (item: any) => any
     ) => Promise<{
         count: number
         items: any[]

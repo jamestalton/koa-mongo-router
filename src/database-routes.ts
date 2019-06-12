@@ -35,7 +35,8 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const result = await databaseFunctions.getCollectionItemsStream(
             params.database,
             params.collection,
-            ctx.request.querystring
+            ctx.request.querystring,
+            options.getItemTransform
         )
         if (result.count != undefined) {
             ctx.set('X-Total-Count', result.count.toString())
@@ -114,6 +115,9 @@ export function getCollectionItemRoute(options: IDatabaseRouterOptions) {
         const result = await databaseFunctions.getCollectionItem(params.database, params.collection, params.id)
         ctx.status = result.status
         if (result.status !== 404) {
+            if (options.getItemTransform) {
+                result.item = await options.getItemTransform(result.item)
+            }
             ctx.body = result.item
         }
     }
