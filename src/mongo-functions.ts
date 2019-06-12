@@ -109,7 +109,7 @@ async function getCollectionItemsStream(
     }
 
     let pipe: any
-    if (getItemTransform) {
+    if (getItemTransform != undefined) {
         pipe = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
             cursor.stream({ transform: getItemTransform }).pipe(
                 destination,
@@ -143,10 +143,13 @@ async function getCollectionItems(
         count = await cursor.count()
     }
 
-    return {
-        count,
-        items: (await cursor.toArray()).map(getItemTransform)
+    let items = await cursor.toArray()
+
+    if (getItemTransform != undefined) {
+        items = items.map(getItemTransform)
     }
+
+    return { count, items }
 }
 
 async function putCollectionItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {

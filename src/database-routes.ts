@@ -115,7 +115,7 @@ export function getCollectionItemRoute(options: IDatabaseRouterOptions) {
         const result = await databaseFunctions.getCollectionItem(params.database, params.collection, params.id)
         ctx.status = result.status
         if (result.status !== 404) {
-            if (options.getItemTransform) {
+            if (options.getItemTransform != undefined) {
                 result.item = await options.getItemTransform(result.item)
             }
             ctx.body = result.item
