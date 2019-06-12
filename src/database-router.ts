@@ -23,6 +23,8 @@ const bodyParser = BodyParser()
 
 export interface IDatabaseRouterOptions {
     permissionCheck?: (ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) => Promise<any>
+    // putItemTransform?: (item: any) => Promise<any>
+    // getItemTransform?: (item: any) => Promise<any>
 }
 
 export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
@@ -44,21 +46,21 @@ export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
             }
             await next()
         })
-        .get('/', permissionCheck, getDatabasesRoute)
-        .get('/:database', permissionCheck, getDatabaseCollectionsRoute)
-        .delete('/:database', permissionCheck, deleteDatabaseRoute)
-        .get('/:database/:collection', permissionCheck, getCollectionItemsRoute)
-        .put('/:database/:collection', permissionCheck, putCollectionItemsRoute)
-        .post('/:database/:collection', permissionCheck, bodyParser, postCollectionItemsRoute)
-        .patch('/:database/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute)
-        .delete('/:database/:collection', permissionCheck, deleteCollectionItemsRoute)
-        .get('/:database/:collection/schema', permissionCheck, getCollectionSchemaRoute)
-        .put('/:database/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute)
-        .delete('/:database/:collection/schema', permissionCheck, deleteCollectionSchemaRoute)
-        .get('/:database/:collection/:id', permissionCheck, getCollectionItemRoute)
-        .put('/:database/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute)
-        .patch('/:database/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute)
-        .delete('/:database/:collection/:id', permissionCheck, deleteCollectionItemRoute)
+        .get('/', permissionCheck, getDatabasesRoute(options))
+        .get('/:database', permissionCheck, getDatabaseCollectionsRoute(options))
+        .delete('/:database', permissionCheck, deleteDatabaseRoute(options))
+        .get('/:database/:collection', permissionCheck, getCollectionItemsRoute(options))
+        .put('/:database/:collection', permissionCheck, putCollectionItemsRoute(options))
+        .post('/:database/:collection', permissionCheck, bodyParser, postCollectionItemsRoute(options))
+        .patch('/:database/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute(options))
+        .delete('/:database/:collection', permissionCheck, deleteCollectionItemsRoute(options))
+        .get('/:database/:collection/schema', permissionCheck, getCollectionSchemaRoute(options))
+        .put('/:database/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute(options))
+        .delete('/:database/:collection/schema', permissionCheck, deleteCollectionSchemaRoute(options))
+        .get('/:database/:collection/:id', permissionCheck, getCollectionItemRoute(options))
+        .put('/:database/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute(options))
+        .patch('/:database/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute(options))
+        .delete('/:database/:collection/:id', permissionCheck, deleteCollectionItemRoute(options))
 }
 
 export function getDatabaseRouter(databaseName: string, options?: IDatabaseRouterOptions) {
@@ -77,8 +79,8 @@ export function getDatabaseRouter(databaseName: string, options?: IDatabaseRoute
             ctx.state.database = databaseName
             await next()
         })
-        .get('/', permissionCheck, getDatabaseCollectionsRoute)
-        .delete('/', permissionCheck, deleteDatabaseRoute)
+        .get('/', permissionCheck, getDatabaseCollectionsRoute(options))
+        .delete('/', permissionCheck, deleteDatabaseRoute(options))
         .param('collection', async (collection: string, ctx: Koa.Context, next: () => Promise<any>) => {
             ctx.state = {
                 ...ctx.state,
@@ -86,16 +88,16 @@ export function getDatabaseRouter(databaseName: string, options?: IDatabaseRoute
             }
             await next()
         })
-        .get('/:collection', permissionCheck, getCollectionItemsRoute)
-        .put('/:collection', permissionCheck, putCollectionItemsRoute)
-        .post('/:collection', permissionCheck, bodyParser, postCollectionItemsRoute)
-        .patch('/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute)
-        .delete('/:collection', permissionCheck, deleteCollectionItemsRoute)
-        .get('/:collection/schema', permissionCheck, getCollectionSchemaRoute)
-        .put('/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute)
-        .delete('/:collection/schema', permissionCheck, deleteCollectionSchemaRoute)
-        .get('/:collection/:id', permissionCheck, getCollectionItemRoute)
-        .put('/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute)
-        .patch('/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute)
-        .delete('/:collection/:id', permissionCheck, deleteCollectionItemRoute)
+        .get('/:collection', permissionCheck, getCollectionItemsRoute(options))
+        .put('/:collection', permissionCheck, putCollectionItemsRoute(options))
+        .post('/:collection', permissionCheck, bodyParser, postCollectionItemsRoute(options))
+        .patch('/:collection', permissionCheck, bodyParser, patchCollectionItemsRoute(options))
+        .delete('/:collection', permissionCheck, deleteCollectionItemsRoute(options))
+        .get('/:collection/schema', permissionCheck, getCollectionSchemaRoute(options))
+        .put('/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute(options))
+        .delete('/:collection/schema', permissionCheck, deleteCollectionSchemaRoute(options))
+        .get('/:collection/:id', permissionCheck, getCollectionItemRoute(options))
+        .put('/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute(options))
+        .patch('/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute(options))
+        .delete('/:collection/:id', permissionCheck, deleteCollectionItemRoute(options))
 }
