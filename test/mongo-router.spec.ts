@@ -85,35 +85,42 @@ describe(`GET /:database/:collection`, function() {
         expect(response.data).toHaveLength(mockItems.length)
     })
 
-    // it(`with filter should return status 200 and an array of filtered items`, async function() {
-    //     expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
-    //     const response = await request.get(`/${database}/${collection}?group=1`)
-    //     expect(response.status).toEqual(200)
-    //     expect(response.data.length).toEqual(mockItems.filter(item => item.group === 1).length)
-    // })
+    it(`with filter should return status 200 and an array of filtered items`, async function() {
+        const mockItems = getMockItems()
+        expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+        const response = await request.get(`/${database}/${collection}?group=1&$sort=name&$fields=-_id`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual(mockItems.filter(item => item.group === 1))
+    })
 
-    // it(`with $skip should return status 200 and an array of items with a skip offset`, async function() {
-    //     const skip = Math.round(mockItems.length / 2)
-    //     expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
-    //     const response = await request.get(`/${database}/${collection}?$skip=${skip}`)
-    //     expect(response.status).toEqual(200)
-    //     expect(response.data.length).toEqual(mockItems.slice(skip))
-    // })
+    it(`with $skip should return status 200 and an array of items with a skip offset`, async function() {
+        const mockItems = getMockItems()
+        const skip = Math.round(mockItems.length / 2)
+        expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+        const response = await request.get(`/${database}/${collection}?$skip=${skip}&$sort=name&$fields=-_id`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual(mockItems.slice(skip))
+    })
 
-    // it(`with $limit should return status 200 and an array of items limited by length`, async function() {
-    //     const limit = Math.round(mockItems.length / 2)
-    //     expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
-    //     const response = await request.get(`/${database}/${collection}?$limit=${limit}`)
-    //     expect(response.status).toEqual(200)
-    //     expect(response.data.length).toEqual(mockItems.slice(0, limit))
-    // })
+    it(`with $limit should return status 200 and an array of items limited by length`, async function() {
+        const mockItems = getMockItems()
+        const limit = Math.round(mockItems.length / 2)
+        expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+        const response = await request.get(`/${database}/${collection}?$limit=${limit}&$sort=name&$fields=-_id`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual(mockItems.slice(0, limit))
+    })
 
-    // it(`with $sort should return status 200 and an array of sorted items`, async function() {
-    //     expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
-    //     const response = await request.get(`/${database}/${collection}?$sort=name`)
-    //     expect(response.status).toEqual(200)
-    //     expect(response.data.length).toEqual(mockItems.length)
-    // })
+    it(`with $sort should return status 200 and an array of sorted items`, async function() {
+        const mockItems = getMockItems()
+        expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+        let response = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual(mockItems)
+        response = await request.get(`/${database}/${collection}?$sort=-name&$fields=-_id`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual(mockItems.reverse())
+    })
 })
 
 describe(`PUT /:database/:collection`, function() {
@@ -232,9 +239,14 @@ describe(`DELETE /:database/:collection`, function() {
         expect((await request.get(`/${database}/${collection}`)).data.length).toEqual(0)
     })
 
-    // it(`with filter should return status 200 and delete the filtered items`, async function() {
-    //     expect(true).toBeFalsy()
-    // })
+    it(`should return status 200 'OK' and delete the filtered items`, async function() {
+        const mockItems = getMockItems()
+        expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+        expect((await request.delete(`/${database}/${collection}?group=1`)).status).toEqual(200)
+        expect((await request.get(`/${database}/${collection}`)).data.length).toEqual(
+            mockItems.filter(item => item.group !== 1).length
+        )
+    })
 })
 
 describe(`GET /:database/:collection/:id`, function() {
