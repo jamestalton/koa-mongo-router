@@ -79,15 +79,17 @@ describe(`GET /:database/:collection`, function() {
         expect(response.headers['content-type']).toContain('application/json')
         expect(response.data.inserted).toHaveLength(mockItems.length)
 
-        response = await request.get(`/${database}/${collection}`)
+        response = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
         expect(response.status).toEqual(200)
         expect(response.headers['content-type']).toContain('application/json')
-        expect(response.data).toHaveLength(mockItems.length)
+        expect(response.data).toEqual(mockItems)
     })
 
     it(`with filter should return status 200 and an array of filtered items`, async function() {
         const mockItems = getMockItems()
+
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
+
         const response = await request.get(`/${database}/${collection}?group=1&$sort=name&$fields=-_id`)
         expect(response.status).toEqual(200)
         expect(response.data).toEqual(mockItems.filter(item => item.group === 1))
@@ -134,9 +136,9 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.unchanged).toHaveLength(0)
         expect(putResponse.data.deleted).toHaveLength(0)
 
-        const getResponse = await request.get<IMockItem[]>(`/${database}/${collection}`)
+        const getResponse = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
         expect(getResponse.status).toEqual(200)
-        expect(getResponse.data.length).toEqual(mockItems.length)
+        expect(getResponse.data).toEqual(mockItems)
     })
 
     it(`should return status 200 'OK' and delete the old items`, async function() {
@@ -149,7 +151,7 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.unchanged).toHaveLength(0)
         expect(putResponse.data.deleted).toHaveLength(0)
 
-        const getResponse = await request.get<IMockItem[]>(`/${database}/${collection}`)
+        const getResponse = await request.get(`/${database}/${collection}`)
         expect(getResponse.status).toEqual(200)
         expect(getResponse.data.length).toEqual(mockItems.length)
 
@@ -164,14 +166,6 @@ describe(`PUT /:database/:collection`, function() {
         expect(putResponse.data.modified).toHaveLength(1)
         expect(putResponse.data.unchanged).toHaveLength(1)
         expect(putResponse.data.deleted).toHaveLength(2)
-    })
-
-    it(`should return status 400 if the request is a object`, async function() {
-        expect((await request.put(`/${database}/${collection}`, { name: 'test' })).status).toEqual(400)
-    })
-
-    it(`should return status 400 if the request is a string`, async function() {
-        expect((await request.put(`/${database}/${collection}`, ['string'])).status).toEqual(400)
     })
 })
 

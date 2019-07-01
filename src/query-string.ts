@@ -1,6 +1,6 @@
 import { parse } from 'querystring'
 
-export interface IMongoQuery {
+export interface ICollectionQuery {
     limit?: number
     skip?: number
     fields?: { [field: string]: number }
@@ -240,7 +240,7 @@ function getKeyValue(key: string, value: any, filter: any) {
     }
 }
 
-export function parseQueryString(queryString: string): IMongoQuery {
+export function parseQueryString(queryString: string): ICollectionQuery {
     queryString = decodeURIComponent(queryString)
     const andQueryStrings = queryString.split('|')
 
@@ -248,7 +248,7 @@ export function parseQueryString(queryString: string): IMongoQuery {
         return parseQuery(parse(andQueryStrings[0]))
     }
 
-    const mongoQuery: IMongoQuery = {
+    const mongoQuery: ICollectionQuery = {
         filter: { $or: [] }
     }
     for (const andQueryString of andQueryStrings) {
@@ -266,7 +266,7 @@ export function parseQueryString(queryString: string): IMongoQuery {
 
 function parseQuery(ctxQuery: any) {
     const filter: any = {}
-    const query: IMongoQuery = { filter }
+    const query: ICollectionQuery = { filter }
 
     for (const key of Object.keys(ctxQuery)) {
         let value = ctxQuery[key]

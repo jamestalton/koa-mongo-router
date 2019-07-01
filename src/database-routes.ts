@@ -1,7 +1,8 @@
 import * as Koa from 'koa'
-import { IDatabaseFunctions } from './database-functions'
-import { IDatabaseRouterOptions } from './database-router'
+import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
+import { IDatabaseRouterOptions } from './database-router-options'
 import { mongoDatabaseFunctions } from './mongo-functions'
+import { ICollectionQuery, parseQueryString } from './query-string'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
@@ -32,12 +33,13 @@ export function deleteDatabaseRoute(options: IDatabaseRouterOptions) {
 export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
     return async function getCollectionItemsRouteHandler(ctx: Koa.Context) {
         const params: IParams = ctx.state
+        const collectionQuery = parseQueryString(ctx.request.querystring)
         const result = await databaseFunctions.getCollectionItemsStream(
             params.database,
             params.collection,
-            ctx.request.querystring,
-            options.getItemTransform
+            collectionQuery
         )
+
         if (result.count != undefined) {
             ctx.set('X-Total-Count', result.count.toString())
         }
@@ -51,16 +53,148 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
 export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
     return async function putCollectionItemsRouteHandler(ctx: Koa.Context) {
         const params: IParams = ctx.state
-        const result = await databaseFunctions.putCollectionItemsStream(
-            params.database,
-            params.collection,
-            ctx.request.querystring,
-            ctx.req
-        )
-        ctx.status = result.status
-        if (result.response != undefined) {
-            ctx.body = result.response
+        const objectIDs: string[] = []
+        const modified: string[] = []
+        const inserted: string[] = []
+        const unchanged: string[] = []
+        const failed: string[] = []
+        let promises: Array<Promise<any>> = []
+        const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
+        let activeCount = 0
+        let paused = false
+        try {
+            await new Promise((resolve, reject) => {
+                const jsonStream = JSONStream.parse('*')
+                    .on('data', async function(item: any) {
+                        if (typeof item === 'string') {
+                            reject(new Error('Bad Request'))
+                            return
+                        }
+
+                        if (item._id != undefined) {
+                            objectIDs.push(item._id)
+
+                            promises.push(
+                                databaseFunctions
+                                    .putCollectionItem(params.database, params.collection, item._id, item)
+                                    .then(status => {
+                                        switch (status) {
+                                            case 200:
+                                                modified.push(item._id)
+                                                break
+                                            case 201:
+                                                inserted.push(item._id)
+                                                break
+                                            case 204:
+                                                unchanged.push(item._id)
+                                                break
+                                            default:
+                                                throw new Error(`PUT Unknown Status: ${status}`)
+                                        }
+                                    })
+                                    .catch(() => {
+                                        failed.push(item._id)
+                                    })
+                                    .finally(() => {
+                                        activeCount--
+                                        if (paused) {
+                                            paused = false
+                                            jsonStream.resume()
+                                        }
+                                    })
+                            )
+                        } else {
+                            promises.push(
+                                databaseFunctions
+                                    .postCollectionItems(params.database, params.collection, item)
+                                    .then(result => {
+                                        switch (result.status) {
+                                            case 201:
+                                                inserted.push(result._id)
+                                                objectIDs.push(result._id)
+                                                break
+                                            default:
+                                                throw new Error(`POST Unknown Status: ${status}`)
+                                        }
+                                    })
+                                    .catch(() => {
+                                        failed.push(item._id)
+                                    })
+                                    .finally(() => {
+                                        activeCount--
+                                        if (paused) {
+                                            paused = false
+                                            jsonStream.resume()
+                                        }
+                                    })
+                            )
+                        }
+                        activeCount++
+                        if (activeCount >= maxAsyncCalls) {
+                            paused = true
+                            jsonStream.pause()
+                        }
+                    })
+                    .on(
+                        'error',
+                        /* istanbul ignore next */
+                        function(err: Error) {
+                            reject(err)
+                        }
+                    )
+                    .on('end', function() {
+                        resolve()
+                    })
+
+                ctx.req.pipe(jsonStream)
+            })
+        } catch (err) {
+            return {
+                status: 400
+            }
         }
+        await Promise.all(promises)
+
+        promises = []
+        const deleted: string[] = []
+        const deleteQuery: ICollectionQuery = {
+            filter: {
+                _id: {
+                    $nin: objectIDs
+                }
+            },
+            fields: {
+                _id: 1
+            }
+        }
+        const deleteItems = await databaseFunctions.getCollectionItems(params.database, params.collection, deleteQuery)
+        for (const deleteItem of deleteItems.items) {
+            promises.push(
+                databaseFunctions
+                    .deleteCollectionItem(params.database, params.collection, deleteItem._id)
+                    .then(status => {
+                        switch (status) {
+                            case 200:
+                                deleted.push(deleteItem._id)
+                                break
+                        }
+                    })
+                    .catch(() => {
+                        /* do nothing */
+                    })
+            )
+        }
+        await Promise.all(promises)
+
+        const response: IPutItemsResponse = {
+            inserted,
+            modified,
+            unchanged,
+            deleted,
+            failed
+        }
+
+        ctx.body = response
     }
 }
 
@@ -124,7 +258,7 @@ export function getCollectionItemRoute(options: IDatabaseRouterOptions) {
 }
 
 export function putCollectionItemRoute(options: IDatabaseRouterOptions) {
-    return async function putCollectionItemRoutehandler(ctx: Koa.Context) {
+    return async function putCollectionItemRouteHandler(ctx: Koa.Context) {
         ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
         const params: IParams = ctx.state
         const item = ctx.request.body

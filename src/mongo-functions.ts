@@ -2,7 +2,7 @@ import { ObjectID } from 'mongodb'
 import { Duplex, Readable } from 'stream'
 import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getDatabase, getDatabaseCollection } from './mongo'
-import { IMongoQuery, parseQueryString } from './query-string'
+import { ICollectionQuery, parseQueryString } from './query-string'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 
@@ -51,7 +51,9 @@ async function deleteDatabase(databaseName: string) {
     return db.dropDatabase()
 }
 
-async function getCollectionItemsCursor(databaseName: string, collectionName: string, query: IMongoQuery) {
+async function getCollectionItemsCursor(databaseName: string, collectionName: string, query: ICollectionQuery) {
+    convertFilter(query.filter)
+
     const collection = await getDatabaseCollection(databaseName, collectionName)
 
     // if query includes "invalid" or "valid" get collection schema to only return valid or invalid items
@@ -97,31 +99,20 @@ async function getCollectionItemsCursor(databaseName: string, collectionName: st
 async function getCollectionItemsStream(
     databaseName: string,
     collectionName: string,
-    querystring: string,
-    getItemTransform: (item: any) => any
+    collectionQuery?: ICollectionQuery
 ) {
-    const query = parseQueryString(querystring)
-    const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
+    const cursor = await getCollectionItemsCursor(databaseName, collectionName, collectionQuery)
 
     let count: number
-    if (query.count === true) {
+    if (collectionQuery != undefined && collectionQuery.count === true) {
         count = await cursor.count()
     }
 
-    let pipe: any
-    if (getItemTransform != undefined) {
-        pipe = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
-            cursor.stream({ transform: getItemTransform }).pipe(
-                destination,
-                options
-            )
-    } else {
-        pipe = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
-            cursor.pipe(
-                destination,
-                options
-            )
-    }
+    const pipe: any = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
+        cursor.pipe(
+            destination,
+            options
+        )
 
     return {
         count,
@@ -129,25 +120,15 @@ async function getCollectionItemsStream(
     }
 }
 
-async function getCollectionItems(
-    databaseName: string,
-    collectionName: string,
-    querystring: string,
-    getItemTransform: (item: any) => any
-) {
-    const query = parseQueryString(querystring)
-    const cursor = await getCollectionItemsCursor(databaseName, collectionName, query)
+async function getCollectionItems(databaseName: string, collectionName: string, collectionQuery?: ICollectionQuery) {
+    const cursor = await getCollectionItemsCursor(databaseName, collectionName, collectionQuery)
 
     let count: number
-    if (query.count === true) {
+    if (collectionQuery != undefined && collectionQuery.count === true) {
         count = await cursor.count()
     }
 
-    let items = await cursor.toArray()
-
-    if (getItemTransform != undefined) {
-        items = items.map(getItemTransform)
-    }
+    const items = await cursor.toArray()
 
     return { count, items }
 }
@@ -456,5 +437,29 @@ async function deleteCollectionSchema(databaseName: string, collectionName: stri
         return 200
     } catch {
         return 404
+    }
+}
+
+function convertFilter(filter: any) {
+    for (const key in filter) {
+        if (key.startsWith('$')) {
+            convertFilter(filter[key])
+        } else if (key === '_id') {
+            const value = filter[key]
+            if (typeof value === 'string') {
+                filter[key] = new ObjectID(value)
+            } else {
+                for (const valueKey of Object.keys(value)) {
+                    switch (valueKey) {
+                        case '$nin':
+                            value[valueKey] = value[valueKey].map((id: string) => new ObjectID(id))
+                            break
+                        case '$eq':
+                            value[valueKey] = new ObjectID(value[valueKey])
+                            break
+                    }
+                }
+            }
+        }
     }
 }

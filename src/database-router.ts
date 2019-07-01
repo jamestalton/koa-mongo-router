@@ -1,6 +1,7 @@
 import * as Koa from 'koa'
 import * as BodyParser from 'koa-bodyparser'
 import * as Router from 'koa-router'
+import { IDatabaseRouterOptions } from './database-router-options'
 import {
     deleteCollectionItemRoute,
     deleteCollectionItemsRoute,
@@ -20,12 +21,6 @@ import {
 } from './database-routes'
 
 const bodyParser = BodyParser()
-
-export interface IDatabaseRouterOptions {
-    permissionCheck?: (ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) => Promise<any>
-    // putItemTransform?: (item: any) => Promise<any>
-    getItemTransform?: (item: any) => any
-}
 
 export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
     const router = new Router()

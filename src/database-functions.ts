@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+import { ICollectionQuery } from './query-string'
 
 export interface IPutItemsResponse {
     inserted: string[]
@@ -18,8 +19,7 @@ export interface IDatabaseFunctions {
     getCollectionItemsStream: (
         databaseName: string,
         collectionName: string,
-        querystring: string,
-        getItemTransform: (item: any) => any
+        collectionQuery?: ICollectionQuery
     ) => Promise<{
         count: number
         pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean }): T
@@ -28,8 +28,7 @@ export interface IDatabaseFunctions {
     getCollectionItems: (
         databaseName: string,
         collectionName: string,
-        querystring: string,
-        getItemTransform: (item: any) => any
+        collectionQuery?: ICollectionQuery
     ) => Promise<{
         count: number
         items: any[]
