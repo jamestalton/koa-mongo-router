@@ -27,7 +27,11 @@ export function getItemTransform(
     const databaseGetItemTransform = getDatabaseGetItemTransform(routerOptions, databaseName)
     const collectionGetItemTransform = getCollectionGetItemTransform(routerOptions, databaseName, collectionName)
 
-    if (globalGetItemTransform == undefined && databaseGetItemTransform == undefined && collectionGetItemTransform) {
+    if (
+        globalGetItemTransform == undefined &&
+        databaseGetItemTransform == undefined &&
+        collectionGetItemTransform == undefined
+    ) {
         return undefined
     }
 
@@ -85,7 +89,11 @@ export function putItemTransform(
     const databasePutItemTransform = getDatabasePutItemTransform(routerOptions, databaseName)
     const collectionPutItemTransform = getCollectionPutItemTransform(routerOptions, databaseName, collectionName)
 
-    if (globalPutItemTransform == undefined && databasePutItemTransform == undefined && collectionPutItemTransform) {
+    if (
+        globalPutItemTransform == undefined &&
+        databasePutItemTransform == undefined &&
+        collectionPutItemTransform == undefined
+    ) {
         return undefined
     }
 

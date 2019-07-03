@@ -12,7 +12,7 @@ export class PromiseTransformStream extends Transform {
     }
 
     public _transform(chunk: any, encoding: any, callback: any) {
-        this.transform(chunk)
+        return this.transform(chunk)
             .then(item => {
                 this.push(item)
             })

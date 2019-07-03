@@ -2,7 +2,6 @@ import * as axios from 'axios'
 import { Server } from 'http'
 import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
-import { IPutItemsResponse } from '../src'
 import { IDatabaseRouterOptions } from '../src/database-router-options'
 
 const database = `mongo-router-transform`
@@ -67,19 +66,6 @@ interface IMockItem {
     _id?: string
     name: string
     group: number
-}
-
-const schema: any = {
-    type: 'object',
-    required: ['name', 'group'],
-    properties: {
-        name: {
-            type: 'string'
-        },
-        group: {
-            type: 'number'
-        }
-    }
 }
 
 function createMockItemID(index: number = 0) {
