@@ -23,10 +23,14 @@ import {
 const bodyParser = BodyParser()
 
 export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
+    if (options == undefined) {
+        options = {}
+    }
+
     const router = new Router()
 
     async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>) {
-        if (options != undefined && options.permissionCheck != undefined) {
+        if (options.permissionCheck != undefined) {
             await options.permissionCheck(ctx, next, ctx.state.database, ctx.state.collection)
         } else {
             await next()
@@ -59,10 +63,14 @@ export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
 }
 
 export function getDatabaseRouter(databaseName: string, options?: IDatabaseRouterOptions) {
+    if (options == undefined) {
+        options = {}
+    }
+
     const router = new Router()
 
     async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>) {
-        if (options != undefined && options.permissionCheck != undefined) {
+        if (options.permissionCheck != undefined) {
             await options.permissionCheck(ctx, next, ctx.state.database, ctx.state.collection)
         } else {
             await next()

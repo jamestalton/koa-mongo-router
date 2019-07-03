@@ -1,8 +1,10 @@
+import { Resolver } from 'dns'
 import * as Koa from 'koa'
 import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
-import { IDatabaseRouterOptions } from './database-router-options'
+import { getItemTransform, IDatabaseRouterOptions, putItemTransform } from './database-router-options'
 import { mongoDatabaseFunctions } from './mongo-functions'
 import { ICollectionQuery, parseQueryString } from './query-string'
+import { PromiseTransformStream } from './utils/promise-transform-stream'
 
 const JSONStream = require('JSONStream') // tslint:disable-line
 const emptyObject = {}
@@ -44,8 +46,16 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
             ctx.set('X-Total-Count', result.count.toString())
         }
         const stream = JSONStream.stringify('[', ',', ']')
-        result.pipe(stream)
+
+        const transform = getItemTransform(options, params.database, params.collection)
+        if (transform != undefined) {
+            const promiseTransformStream: PromiseTransformStream = new PromiseTransformStream(transform)
+            result.pipe(promiseTransformStream).pipe(stream)
+        } else {
+            result.pipe(stream)
+        }
         ctx.set('content-type', 'application/json; charset=utf-8')
+
         ctx.body = stream
     }
 }
@@ -62,10 +72,16 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
         let activeCount = 0
         let paused = false
+
+        let transform = putItemTransform(options, params.database, params.collection)
+        if (transform == undefined) {
+            transform = (item: any) => Promise.resolve(item)
+        }
+
         try {
             await new Promise((resolve, reject) => {
                 const jsonStream = JSONStream.parse('*')
-                    .on('data', async function(item: any) {
+                    .on('data', function(item: any) {
                         if (typeof item === 'string') {
                             reject(new Error('Bad Request'))
                             return
@@ -73,60 +89,68 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
 
                         if (item._id != undefined) {
                             objectIDs.push(item._id)
-
                             promises.push(
-                                databaseFunctions
-                                    .putCollectionItem(params.database, params.collection, item._id, item)
-                                    .then(status => {
-                                        switch (status) {
-                                            case 200:
-                                                modified.push(item._id)
-                                                break
-                                            case 201:
-                                                inserted.push(item._id)
-                                                break
-                                            case 204:
-                                                unchanged.push(item._id)
-                                                break
-                                            default:
-                                                throw new Error(`PUT Unknown Status: ${status}`)
-                                        }
-                                    })
-                                    .catch(() => {
-                                        failed.push(item._id)
-                                    })
-                                    .finally(() => {
-                                        activeCount--
-                                        if (paused) {
-                                            paused = false
-                                            jsonStream.resume()
-                                        }
-                                    })
+                                transform(item).then(transformedItem => {
+                                    return databaseFunctions
+                                        .putCollectionItem(
+                                            params.database,
+                                            params.collection,
+                                            transformedItem._id,
+                                            transformedItem
+                                        )
+                                        .then(status => {
+                                            switch (status) {
+                                                case 200:
+                                                    modified.push(transformedItem._id)
+                                                    break
+                                                case 201:
+                                                    inserted.push(transformedItem._id)
+                                                    break
+                                                case 204:
+                                                    unchanged.push(transformedItem._id)
+                                                    break
+                                                default:
+                                                    throw new Error(`PUT Unknown Status: ${status}`)
+                                            }
+                                        })
+                                        .catch(() => {
+                                            failed.push(transformedItem._id)
+                                        })
+                                        .finally(() => {
+                                            activeCount--
+                                            if (paused) {
+                                                paused = false
+                                                jsonStream.resume()
+                                            }
+                                        })
+                                })
                             )
                         } else {
                             promises.push(
-                                databaseFunctions
-                                    .postCollectionItems(params.database, params.collection, item)
-                                    .then(result => {
-                                        switch (result.status) {
-                                            case 201:
-                                                inserted.push(result._id)
-                                                objectIDs.push(result._id)
-                                                break
-                                            default:
-                                                throw new Error(`POST Unknown Status: ${status}`)
-                                        }
-                                    })
-                                    .catch(() => {
-                                        failed.push(item._id)
-                                    })
-                                    .finally(() => {
-                                        activeCount--
-                                        if (paused) {
-                                            paused = false
-                                            jsonStream.resume()
-                                        }
-                                    })
+                                transform(item).then(transformedItem => {
+                                    return databaseFunctions
+                                        .postCollectionItems(params.database, params.collection, transformedItem)
+                                        .then(result => {
+                                            switch (result.status) {
+                                                case 201:
+                                                    inserted.push(result._id)
+                                                    objectIDs.push(result._id)
+                                                    break
+                                                default:
+                                                    throw new Error(`POST Unknown Status: ${status}`)
+                                            }
+                                        })
+                                        .catch(() => {
+                                            failed.push(item._id)
+                                        })
+                                        .finally(() => {
+                                            activeCount--
+                                            if (paused) {
+                                                paused = false
+                                                jsonStream.resume()
+                                            }
+                                        })
+                                })
                             )
                         }
                         activeCount++
@@ -207,7 +231,11 @@ export function postCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const params: IParams = ctx.state
         const result = await databaseFunctions.postCollectionItems(params.database, params.collection, ctx.request.body)
         ctx.status = result.status
-        ctx.body = result
+
+        // TODO
+        ctx.body = {
+            _id: result._id
+        }
     }
 }
 
@@ -249,8 +277,9 @@ export function getCollectionItemRoute(options: IDatabaseRouterOptions) {
         const result = await databaseFunctions.getCollectionItem(params.database, params.collection, params.id)
         ctx.status = result.status
         if (result.status !== 404) {
-            if (options.getItemTransform != undefined) {
-                result.item = await options.getItemTransform(result.item)
+            const transform = getItemTransform(options, params.database, params.collection)
+            if (transform != undefined) {
+                result.item = await transform(result.item)
             }
             ctx.body = result.item
         }

@@ -171,7 +171,7 @@ export async function getDatabaseCollection(databaseName: string, collectionName
 }
 
 /* istanbul ignore next */
-export async function closeAllMongoConnections(force: boolean = false): Promise<void> {
+export async function closeDatabases(force: boolean = false): Promise<void> {
     try {
         const mongoClient: MongoClient = await getMongoClient(false)
         await mongoClient.close(force)
