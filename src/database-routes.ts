@@ -248,12 +248,18 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
 
 export function postCollectionItemsRoute(options: IDatabaseRouterOptions) {
     return async function postCollectionItemsRouteHandler(ctx: Koa.Context) {
-        const body = ctx.request.body
+        let body = ctx.request.body
         ctx.assert(typeof body !== 'string', 400, 'body must be json object')
         ctx.assert(!Array.isArray(body), 400, 'body must be json object')
         ctx.assert(body._id === undefined, 400, 'body cannot contain an _id')
         const params: IParams = ctx.state
-        const result = await databaseFunctions.postCollectionItems(params.database, params.collection, ctx.request.body)
+
+        const transform = putItemTransform(options, params.database, params.collection)
+        if (transform !== undefined) {
+            body = await transform(body)
+        }
+
+        const result = await databaseFunctions.postCollectionItems(params.database, params.collection, body)
         ctx.status = result.status
 
         // TODO
@@ -314,8 +320,14 @@ export function putCollectionItemRoute(options: IDatabaseRouterOptions) {
     return async function putCollectionItemRouteHandler(ctx: Koa.Context) {
         ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
         const params: IParams = ctx.state
-        const item = ctx.request.body
+        let item = ctx.request.body
         ctx.assert(item._id == undefined || item._id === params.id, 400, 'body _id does not match id in route')
+
+        const transform = putItemTransform(options, params.database, params.collection)
+        if (transform !== undefined) {
+            item = await transform(item)
+        }
+
         if (ctx.request.get('if-match') === '*') {
             ctx.status = await databaseFunctions.putCollectionItemOnlyIfAlreadyExists(
                 params.database,

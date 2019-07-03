@@ -92,18 +92,16 @@ function getMockItems(count = 4) {
 }
 
 describe(`GET&PUT /:database/:collection`, function() {
-    it(`should return transformed items`, async function() {
+    it(`should transform items`, async function() {
         const mockItems = getMockItems()
 
         let response = await request.put(`/${database}/${collection}`, mockItems)
         expect(response.status).toEqual(200)
         expect(response.headers['content-type']).toContain('application/json')
         expect(response.data.inserted).toHaveLength(mockItems.length)
-        expect(response.data.deleted).toHaveLength(0)
 
         response = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
         expect(response.status).toEqual(200)
-        expect(response.headers['content-type']).toContain('application/json')
         expect(response.data).toEqual(
             mockItems.map(item => {
                 ;(item as any).testGlobalGetTransform = 'global'
@@ -130,6 +128,9 @@ describe(`GET /:database/:collection/:id`, function() {
         ;(mockItem as any).testGlobalGetTransform = 'global'
         ;(mockItem as any).testDatabaseGetTransform = 'database'
         ;(mockItem as any).testCollectionGetTransform = 'collection'
+        ;(mockItem as any).testGlobalPutTransform = 'global'
+        ;(mockItem as any).testDatabasePutTransform = 'database'
+        ;(mockItem as any).testCollectionPutTransform = 'collection'
         const getResponse = await request.get<IMockItem>(`/${database}/${collection}/${mockItem._id}`)
         expect(getResponse.status).toEqual(200)
         expect(getResponse.data).toEqual(mockItem)
