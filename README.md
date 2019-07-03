@@ -1,6 +1,6 @@
 # KOA REST API Router for MongoDB
 
-A router that exposes a standard REST API for a MongoDB.
+A router that exposes a standard REST API for a MongoDB
 
 ## Status: BETA
 
