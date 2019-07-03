@@ -91,7 +91,7 @@ function getMockItems(count = 4) {
     return mockItems
 }
 
-describe(`GET&PUT /:database/:collection`, function() {
+describe(`PUT&GET /:database/:collection`, function() {
     it(`should transform items`, async function() {
         const mockItems = getMockItems()
 
@@ -116,10 +116,31 @@ describe(`GET&PUT /:database/:collection`, function() {
     })
 })
 
-describe(`GET /:database/:collection/:id`, function() {
-    it(`should return status 200 'OK' and the item with the transform`, async function() {
+describe(`POST&GET /:database/:collection/:id`, function() {
+    it(`should transform the item`, async function() {
         let mockItem = getMockItem()
         const response = await request.post(`/${database}/${collection}`, mockItem)
+        expect(response.status).toEqual(201)
+        mockItem = {
+            ...mockItem,
+            ...response.data
+        }
+        ;(mockItem as any).testGlobalGetTransform = 'global'
+        ;(mockItem as any).testDatabaseGetTransform = 'database'
+        ;(mockItem as any).testCollectionGetTransform = 'collection'
+        ;(mockItem as any).testGlobalPutTransform = 'global'
+        ;(mockItem as any).testDatabasePutTransform = 'database'
+        ;(mockItem as any).testCollectionPutTransform = 'collection'
+        const getResponse = await request.get<IMockItem>(`/${database}/${collection}/${mockItem._id}`)
+        expect(getResponse.status).toEqual(200)
+        expect(getResponse.data).toEqual(mockItem)
+    })
+})
+
+describe(`PUT&GET /:database/:collection/:id`, function() {
+    it(`should transform the item`, async function() {
+        let mockItem = getMockItem(true)
+        const response = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         expect(response.status).toEqual(201)
         mockItem = {
             ...mockItem,
