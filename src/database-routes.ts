@@ -48,7 +48,16 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
 
         const transform = getItemTransform(options, params.database, params.collection)
         if (transform != undefined) {
-            const promiseTransformStream: PromiseTransformStream = new PromiseTransformStream(transform)
+            let concurrency = 100
+            if (ctx.query.$concurrency != undefined) {
+                concurrency = Number(ctx.query.$concurrency)
+                ctx.assert(Number.isInteger(concurrency), 400, 'concurrency must be an integer')
+                if (concurrency === 0 || concurrency === -1) {
+                    concurrency = Number.MAX_SAFE_INTEGER
+                }
+                ctx.assert(concurrency > 0, 400, 'concurrency must be greater than 0')
+            }
+            const promiseTransformStream: PromiseTransformStream = new PromiseTransformStream(transform, concurrency)
             result.pipe(promiseTransformStream).pipe(stream)
         } else {
             result.pipe(stream)
@@ -75,9 +84,18 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const unchanged: string[] = []
         const failed: string[] = []
         let promises: Array<Promise<any>> = []
-        const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
         let activeCount = 0
         let paused = false
+
+        let concurrency = 100
+        if (ctx.query.$concurrency != undefined) {
+            concurrency = Number(ctx.query.$concurrency)
+            ctx.assert(Number.isInteger(concurrency), 400, 'concurrency must be an integer')
+            if (concurrency === 0 || concurrency === -1) {
+                concurrency = Number.MAX_SAFE_INTEGER
+            }
+            ctx.assert(concurrency > 0, 400, 'concurrency must be greater than 0')
+        }
 
         let transform = putItemTransform(options, params.database, params.collection)
         if (transform == undefined) {
@@ -160,7 +178,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
                             )
                         }
                         activeCount++
-                        if (activeCount >= maxAsyncCalls) {
+                        if (activeCount >= concurrency) {
                             paused = true
                             jsonStream.pause()
                         }
