@@ -1,6 +1,6 @@
 {
     "name": "koa-mongo-router",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "KOA REST API Router for MongoDB",
     "author": "James Talton",
     "license": "ISC",
