@@ -20,8 +20,6 @@ before_script:
 
 script: npm run test && npm run build
 
-after_success: cat coverage/lcov.info | coveralls
-
 jobs:
     include:
         - stage: release

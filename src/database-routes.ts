@@ -1,4 +1,3 @@
-import { Resolver } from 'dns'
 import * as Koa from 'koa'
 import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getItemTransform, IDatabaseRouterOptions, putItemTransform } from './database-router-options'
