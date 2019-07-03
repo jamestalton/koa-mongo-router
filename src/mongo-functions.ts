@@ -160,7 +160,7 @@ async function putCollectionItemsStream(
     try {
         await new Promise((resolve, reject) => {
             const jsonStream = JSONStream.parse('*')
-                .on('data', async function(item: any) {
+                .on('data', function(item: any) {
                     if (typeof item === 'string') {
                         reject(new Error('Bad Request'))
                         return

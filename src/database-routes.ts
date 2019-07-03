@@ -53,8 +53,15 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
         } else {
             result.pipe(stream)
         }
-        ctx.set('content-type', 'application/json; charset=utf-8')
-
+        ctx.response.type = 'application/json; charset=utf-8'
+        ctx.set('Trailer', 'X-Count')
+        let count = 0
+        stream.on('data', () => {
+            count++
+        })
+        ctx.res.on('wantTrailers', () => {
+            ctx.res.addTrailers({ 'X-Count': count.toString() })
+        })
         ctx.body = stream
     }
 }
