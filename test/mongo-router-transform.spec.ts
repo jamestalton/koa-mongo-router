@@ -4,8 +4,8 @@ import { AddressInfo } from 'net'
 import { startApp, stopApp } from '../example/example-app'
 import { IDatabaseRouterOptions } from '../src/database-router-options'
 
-const database = `mongo-router-transform`
-const collection = `items`
+const database = `test-transform-database`
+const collection = `test-transform-collection`
 
 let request: axios.AxiosInstance
 let server: Server
@@ -21,7 +21,7 @@ beforeAll(async function() {
             return item
         },
         databases: {
-            'mongo-router-transform': {
+            'test-transform-database': {
                 getItemTransform: async item => {
                     item.testDatabaseGetTransform = 'database'
                     return item
@@ -31,7 +31,7 @@ beforeAll(async function() {
                     return item
                 },
                 collections: {
-                    items: {
+                    'test-transform-collection': {
                         getItemTransform: async item => {
                             item.testCollectionGetTransform = 'collection'
                             return item
