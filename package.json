@@ -40,7 +40,7 @@
         "koa-router": "^7.4.0",
         "le_node": "^1.8.0",
         "mongodb": "^3.2.7",
-        "node-server-utils": "0.0.15"
+        "node-server-utils": "0.0.18"
     },
     "devDependencies": {
         "@types/jest": "^24.x.x",
@@ -52,6 +52,6 @@
         "ts-node-dev": "^1.0.0-pre.32",
         "tslint": "^5.18.0",
         "tslint-config-prettier": "^1.18.0",
-        "typescript": "^3.5.2"
+        "typescript": "^3.5.3"
     }
 }
