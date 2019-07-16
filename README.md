@@ -17,43 +17,48 @@ npm install koa-mongo-router
 ```
 
 ```TypeScript
-import { getMongoRouter } from './mongo-router'
+import { getDatabaseRouter } from 'koa-mongo-router'
+import { IDatabaseRouterOptions } from 'koa-mongo-router/lib/database-router-options'
 
-// Example permission check function
-async function permissionCheck(ctx: Koa.Context, next: () => Promise<any>, database: string, collection: string) {
-    // Assumes you have middleware that already adds a user
-    if (ctx.state.user == undefined) {
-        ctx.status = 401
-        return
+const databaseRouterOptions: IDatabaseRouterOptions = {
+    permissionCheck: async (
+        ctx: Koa.Context,
+        next: () => Promise<any>,
+        database: string,
+        collection: string
+    ) => {
+        // Assumes you have middleware that already adds a user
+        if (ctx.state.user == undefined) {
+            ctx.status = 401
+            return
+        }
+
+        // Example of validating if a user has read or write permissions
+        switch (ctx.Method) {
+            case "GET":
+                if (!ctx.state.user.canRead(database, collection)) {
+                    ctx.status = 403
+                    return
+                }
+                break
+
+            case "PUT":
+            case "POST":
+            case "PATCH":
+            case "DELETE":
+                if (!ctx.state.user.canWrite(database, collection)) {
+                    ctx.status = 403
+                    return
+                }
+                break
+        }
+
+        // If user haas permission for method, then continue on
+        await next()
     }
+};
 
-    // Example of validating if a user has read or write permissions
-    switch (ctx.Method) {
-        case 'GET':
-            if (!ctx.state.user.canRead(database, collection)) {
-                ctx.status = 403
-                return
-            }
-            break
-
-        case 'PUT':
-        case 'POST':
-        case 'PATCH':
-        case 'DELETE':
-            if (!ctx.state.user.canWrite(database, collection)) {
-                ctx.status = 403
-                return
-            }
-            break
-    }
-
-    // If user haas permission for method, then continue on
-    await next()
-}
-
-const mongoRouter = getMongoRouter({
-    permissionCheck
-})
+const mongoRouter = getDatabaseRouter(databaseRouterOptions)
 
 const app = new Koa()
     .use(mongoRouter.routes())
@@ -225,3 +230,4 @@ Delete an item.
 | field starts with case-insensitive string | ?foo^=bar          |
 |   field ends with case-insensitive string | ?foo\$=bar         |
 |                             record exists | ?!                 |
+
