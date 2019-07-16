@@ -230,4 +230,3 @@ Delete an item.
 | field starts with case-insensitive string | ?foo^=bar          |
 |   field ends with case-insensitive string | ?foo\$=bar         |
 |                             record exists | ?!                 |
-
