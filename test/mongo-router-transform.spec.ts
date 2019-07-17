@@ -91,6 +91,17 @@ function getMockItems(count = 4) {
     return mockItems
 }
 
+describe(`GET /:database/:collection`, function() {
+    it(`should work with transform and 0 items in collection`, async function() {
+        let response = await request.delete(`/${database}/${collection}`)
+        expect(response.status).toEqual(200)
+
+        response = await request.get(`/${database}/${collection}`)
+        expect(response.status).toEqual(200)
+        expect(response.data).toEqual([])
+    })
+})
+
 describe(`PUT&GET /:database/:collection`, function() {
     it(`should transform items`, async function() {
         const mockItems = getMockItems()

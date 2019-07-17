@@ -52,8 +52,12 @@ export class PromiseTransformStream extends Transform {
     }
 
     public end(chunk: any, encoding?: any, cb?: () => void): void {
-        this.endCallback = () => {
+        if (this.results.length === 0) {
             super.end(chunk, encoding, cb)
+        } else {
+            this.endCallback = () => {
+                super.end(chunk, encoding, cb)
+            }
         }
     }
 }
