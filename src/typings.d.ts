@@ -1,1 +1,1 @@
-declare module 'le_node'
+declare module 'r7insight_node'

@@ -1,13 +1,14 @@
 /* istanbul ignore file */
 
-import * as le_node from 'le_node'
 import { ILogger, ILogObject } from 'node-server-utils'
+import * as r7InsightNode from 'r7insight_node'
 
 export function getLogEntriesLogger(logEntriesToken: string, hook?: (logObject: ILogObject) => ILogObject) {
-    const leNode = new le_node({
+    const logEntriesInsightNode = new r7InsightNode({
         token: logEntriesToken,
         minLevel: 'info',
         withLevel: false,
+        region: 'eu',
         flatten: false,
         timestamp: false,
         levels: ['debug', 'info', 'notice', 'warn', 'error', 'crit', 'alert', 'emerg']
@@ -15,43 +16,43 @@ export function getLogEntriesLogger(logEntriesToken: string, hook?: (logObject: 
 
     const logEntriesLogger: ILogger = {
         silly: (logObject: ILogObject) => {
-            if (leNode != undefined) {
+            if (logEntriesInsightNode != undefined) {
                 if (hook != undefined) {
                     logObject = hook(logObject)
                 }
-                leNode.debug(logObject)
+                logEntriesInsightNode.debug(logObject)
             }
         },
         debug: (logObject: ILogObject) => {
-            if (leNode != undefined) {
+            if (logEntriesInsightNode != undefined) {
                 if (hook != undefined) {
                     logObject = hook(logObject)
                 }
-                leNode.debug(logObject)
+                logEntriesInsightNode.debug(logObject)
             }
         },
         info: (logObject: ILogObject) => {
-            if (leNode != undefined) {
+            if (logEntriesInsightNode != undefined) {
                 if (hook != undefined) {
                     logObject = hook(logObject)
                 }
-                leNode.info(logObject)
+                logEntriesInsightNode.info(logObject)
             }
         },
         warn: (logObject: ILogObject) => {
-            if (leNode != undefined) {
+            if (logEntriesInsightNode != undefined) {
                 if (hook != undefined) {
                     logObject = hook(logObject)
                 }
-                leNode.warn(logObject)
+                logEntriesInsightNode.warn(logObject)
             }
         },
         error: (logObject: ILogObject) => {
-            if (leNode != undefined) {
+            if (logEntriesInsightNode != undefined) {
                 if (hook != undefined) {
                     logObject = hook(logObject)
                 }
-                leNode.error(logObject)
+                logEntriesInsightNode.error(logObject)
             }
         }
     }
