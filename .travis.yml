@@ -21,6 +21,7 @@ before_script:
 script:
     - npm run test
     - npm run build
+    - ./update.sh
 
 jobs:
     include:
@@ -28,5 +29,4 @@ jobs:
           deploy:
               provider: script
               skip_cleanup: true
-              script:
-                  - npx semantic-release
+              script: npx semantic-release
