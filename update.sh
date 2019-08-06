@@ -25,6 +25,8 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
     git commit -m "fix(deps): upgrade dependencies"
     git remote remove origin
     git remote add origin https://next-update:$GH_TOKEN@github.com/jamestalton/koa-mongo-router.git
+    git push origin master
+
   else
     echo No upgrades available
   fi
