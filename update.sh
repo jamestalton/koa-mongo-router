@@ -17,16 +17,15 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
 
   if ! git diff-files --quiet --ignore-submodules -- > /dev/null; then
     npm build
-    npm test
+    # npm test
     npm audit
-    git add -u :/
     git config --global user.email "travis@travis-ci.org"
     git config --global user.name "Travis CI"
+    git add -u :/
     git commit -m "fix(deps): upgrade dependencies"
     git remote remove origin
-    git remote add origin https://next-update:$GH_TOKEN@github.com/jamestalton/koa-mongo-router.git
-    git push origin master
-
+    git remote add origin https://${GH_TOKEN}@github.com/jamestalton/koa-mongo-router.git > /dev/null 2>&1
+    git push --quiet --set-upstream origin master
   else
     echo No upgrades available
   fi
