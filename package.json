@@ -46,7 +46,6 @@
         "@types/jest": "^24.x.x",
         "axios": "^0.19.0",
         "jest": "^24.x.x",
-        "next-update-travis": "^1.7.1",
         "prettier": "^1.18.2",
         "ts-jest": "^24.x.x",
         "ts-node": "^8.3.0",

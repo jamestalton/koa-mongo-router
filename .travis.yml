@@ -19,7 +19,6 @@ before_script:
     - sleep 1
 
 script:
-    - ./next-update-travis.sh
     - npm run test
     - npm run build
 
