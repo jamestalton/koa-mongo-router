@@ -11,6 +11,7 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
   rm -rf node_modules
   rm -f package-lock.json
 
+  npx ncu -u
   npm install
   npm audit fix
 
@@ -25,5 +26,7 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
     git remote remove origin
     git remote add origin https://next-update:$GH_TOKEN@github.com/jamestalton/koa-mongo-router.git
     git push origin HEAD:master
+  else
+    echo No upgrades available
   fi
 fi
