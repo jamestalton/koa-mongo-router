@@ -11,7 +11,7 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
   rm -rf node_modules
   rm -f package-lock.json
 
-  npx ncu -u
+  npx npm-check-updates -u
   npm install
   npm audit fix
 
@@ -19,7 +19,7 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
     npm build
     npm test
     npm audit
-    git add package.json
+    git add -u :/
     git config --global user.email "travis@travis-ci.org"
     git config --global user.name "Travis CI"
     git commit -m "fix(deps): upgrade dependencies"
