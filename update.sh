@@ -15,7 +15,7 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
   npm install
   npm audit fix
 
-  if git diff --name-only | grep package.json > /dev/null; then
+  if ! git diff-files --quiet --ignore-submodules -- > /dev/null; then
     npm build
     npm test
     npm audit
@@ -25,7 +25,6 @@ if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
     git commit -m "fix(deps): upgrade dependencies"
     git remote remove origin
     git remote add origin https://next-update:$GH_TOKEN@github.com/jamestalton/koa-mongo-router.git
-    git push origin HEAD:master
   else
     echo No upgrades available
   fi
