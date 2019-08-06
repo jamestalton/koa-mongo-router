@@ -18,7 +18,10 @@ before_script:
     - mongo --eval 'rs.initiate()'
     - sleep 1
 
-script: npm run test && npm run build
+script:
+    - ./next-update-travis.sh
+    - npm run test
+    - npm run build
 
 jobs:
     include:
