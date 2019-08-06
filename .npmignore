@@ -6,6 +6,7 @@ mongodb-linux-x86_64-3.6.6.tgz
 mongodb-linux-x86_64-3.6.6
 src
 test
+.DS_Store
 .dockerignore
 .gitignore
 .npmignore
@@ -18,3 +19,4 @@ prettier.config.js
 tsconfig.json
 tslint.json
 webpack.config.js
+update.sh

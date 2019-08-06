@@ -17,7 +17,7 @@
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "scripts": {
-        "build": "rm -rf lib && tsc",
+        "build": "rm -rf lib && tsc --sourceMap false",
         "test": "npm run jest && npm run lint && npm run check",
         "start": "PORT=3000 MAX_WORKERS=2 LOG_LEVEL=debug ts-node-dev --no-notify --respawn example/example.ts",
         "jest": "rm -rf coverage && jest",

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 set -e
 
 if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
