@@ -25,7 +25,6 @@ jobs:
               - npm test
               - npm run build
               - ./scripts/publish.sh
-              - ./scripts/update.sh
 
         - stage: Automated Dependency Upgrade
           if: type = cron AND branch = master
