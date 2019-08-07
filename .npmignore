@@ -19,4 +19,4 @@ prettier.config.js
 tsconfig.json
 tslint.json
 webpack.config.js
-update.sh
+scripts
