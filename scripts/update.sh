@@ -7,8 +7,10 @@ if [ "$GH_TOKEN" = "" ]; then
   exit 1
 fi
 
+PACKAGE_NAME=`cat package.json | jq .name | tr -d '"'`
+
 git remote remove origin
-git remote add origin https://${GH_TOKEN}@github.com/jamestalton/koa-mongo-router.git > /dev/null 2>&1
+git remote add origin https://${GH_TOKEN}@github.com/jamestalton/${PACKAGE_NAME}.git > /dev/null 2>&1
 git checkout master
 
 rm -rf node_modules
