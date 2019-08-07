@@ -1,13 +1,5 @@
 language: node_js
-node_js: 
-    - "10"
-
-if: tag IS blank
-
-branches:
-    only:
-        - master
-
+node_js: '10'
 install: npm ci
 
 before_script:
@@ -19,18 +11,22 @@ before_script:
     - mongo --eval 'rs.initiate()'
     - sleep 1
 
-script:
-    - npm run test
-    - npm run build
-    - ./update.sh
-
 jobs:
     include:
-        - stage: release
-          deploy:
-              provider: script
-              skip_cleanup: true
-              script: npx semantic-release
-              on:
-                branch: master
-                condition: $TRAVIS_EVENT_TYPE != cron
+        - stage: Pull Request Build and Test
+          if: type = pull_request
+          script:
+              - npm test
+              - npm run build
+
+        - stage: Build, Test, and Publish
+          if: type = push AND branch = master
+          script:
+              - npm test
+              - npm run build
+              - ./scripts/publish.sh
+
+        - stage: Automated Dependency Upgrade
+          if: type = cron AND branch = master
+          script:
+              - ./scripts/update.sh
