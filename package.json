@@ -1,6 +1,6 @@
 {
     "name": "koa-mongo-router",
-    "version": "0.0.0-development",
+    "version": "0.4.16",
     "description": "KOA REST API Router for MongoDB",
     "author": "James Talton",
     "license": "ISC",
@@ -39,7 +39,7 @@
         "koa-bodyparser": "^4.2.1",
         "koa-router": "^7.4.0",
         "mongodb": "^3.2.7",
-        "node-server-utils": "0.0.18",
+        "node-server-utils": "0.0.21",
         "r7insight_node": "^1.8.3"
     },
     "devDependencies": {
