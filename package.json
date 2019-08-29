@@ -38,7 +38,7 @@
         "koa": "^2.8.1",
         "koa-bodyparser": "^4.2.1",
         "koa-router": "^7.4.0",
-        "mongodb": "^3.3.1",
+        "mongodb": "^3.3.2",
         "node-server-utils": "0.0.28",
         "r7insight_node": "^1.8.3"
     },
@@ -52,6 +52,6 @@
         "ts-node-dev": "^1.0.0-pre.40",
         "tslint": "^5.19.0",
         "tslint-config-prettier": "^1.18.0",
-        "typescript": "^3.5.3"
+        "typescript": "^3.6.2"
     }
 }
