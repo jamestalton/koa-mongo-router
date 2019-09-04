@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb'
-import { Duplex, Readable } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import { IDatabaseFunctions, IPutItemsResponse } from './database-functions'
 import { getDatabase, getDatabaseCollection } from './mongo'
 import { ICollectionQuery, parseQueryString } from './query-string'
@@ -134,7 +134,7 @@ async function getCollectionItems(databaseName: string, collectionName: string, 
 }
 
 async function putCollectionItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {
-    const stream: Duplex = new Duplex()
+    const stream: PassThrough = new PassThrough()
     stream.write(JSON.stringify(items))
     return putCollectionItemsStream(databaseName, collectionName, querystring, stream)
 }
