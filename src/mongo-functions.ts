@@ -134,8 +134,9 @@ async function getCollectionItems(databaseName: string, collectionName: string, 
 }
 
 async function putCollectionItems(databaseName: string, collectionName: string, querystring: string, items: any[]) {
-    const stream: PassThrough = new PassThrough()
+    const stream: PassThrough = new PassThrough({})
     stream.write(JSON.stringify(items))
+    stream.end()
     return putCollectionItemsStream(databaseName, collectionName, querystring, stream)
 }
 
