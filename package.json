@@ -39,7 +39,7 @@
         "koa-bodyparser": "^4.2.1",
         "koa-router": "^7.4.0",
         "mongodb": "^3.3.2",
-        "node-server-utils": "0.0.38",
+        "node-server-utils": "0.0.39",
         "r7insight_node": "^1.8.3"
     },
     "devDependencies": {
@@ -48,7 +48,7 @@
         "jest": "^24.x.x",
         "prettier": "^1.18.2",
         "ts-jest": "^24.x.x",
-        "ts-node": "^8.3.0",
+        "ts-node": "^8.4.1",
         "ts-node-dev": "^1.0.0-pre.40",
         "tslint": "^5.20.0",
         "tslint-config-prettier": "^1.18.0",
