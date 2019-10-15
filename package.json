@@ -19,7 +19,7 @@
     "scripts": {
         "build": "rm -rf lib && tsc --sourceMap false",
         "test": "npm run jest && npm run lint && npm run check",
-        "start": "PORT=3000 MAX_WORKERS=2 LOG_LEVEL=debug ts-node-dev --no-notify --respawn example/example.ts",
+        "start": "PORT=3000 MAX_WORKERS=2 LOG_LEVEL=debug ts-node-dev --no-notify --no-deps --respawn --transpile-only example/example.ts",
         "jest": "rm -rf coverage && jest",
         "lint": "tslint -p . && tslint -p test -c test/tslint.json",
         "lint-fix": "tslint -p . --fix && tslint -p test -c test/tslint.json --fix",
