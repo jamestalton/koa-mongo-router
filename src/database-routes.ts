@@ -11,20 +11,20 @@ const emptyObject = {}
 export let databaseFunctions: IDatabaseFunctions = mongoDatabaseFunctions
 
 export function getDatabasesRoute(options: IDatabaseRouterOptions) {
-    return async function getDatabasesRouteHandler(ctx: Koa.Context) {
+    return async function getDatabasesRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         ctx.body = await databaseFunctions.getDatabases()
     }
 }
 
 export function getDatabaseCollectionsRoute(options: IDatabaseRouterOptions) {
-    return async function getDatabaseCollectionsRouteHandler(ctx: Koa.Context) {
+    return async function getDatabaseCollectionsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         ctx.body = await databaseFunctions.getDatabaseCollections(params.database)
     }
 }
 
 export function deleteDatabaseRoute(options: IDatabaseRouterOptions) {
-    return async function deleteDatabaseRouteHandler(ctx: Koa.Context) {
+    return async function deleteDatabaseRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         ctx.body = await databaseFunctions.deleteDatabase(params.database)
     }
@@ -32,7 +32,7 @@ export function deleteDatabaseRoute(options: IDatabaseRouterOptions) {
 
 // TODO queryString support for $explain
 export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
-    return async function getCollectionItemsRouteHandler(ctx: Koa.Context) {
+    return async function getCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const collectionQuery = parseQueryString(ctx.request.querystring)
         const result = await databaseFunctions.getCollectionItemsStream(
@@ -76,7 +76,7 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
 }
 
 export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
-    return async function putCollectionItemsRouteHandler(ctx: Koa.Context) {
+    return async function putCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const objectIDs: string[] = []
         const modified: string[] = []
@@ -247,7 +247,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
 }
 
 export function postCollectionItemsRoute(options: IDatabaseRouterOptions) {
-    return async function postCollectionItemsRouteHandler(ctx: Koa.Context) {
+    return async function postCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         let body: any = ctx.request.body
         ctx.assert(typeof body !== 'string', 400, 'body must be json object')
         ctx.assert(!Array.isArray(body), 400, 'body must be json object')
@@ -270,7 +270,7 @@ export function postCollectionItemsRoute(options: IDatabaseRouterOptions) {
 }
 
 export function patchCollectionItemsRoute(options: IDatabaseRouterOptions) {
-    return async function patchCollectionItemsRouteHandler(ctx: Koa.Context) {
+    return async function patchCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
         const params: IParams = ctx.state
         const result = await databaseFunctions.patchCollectionItems(
@@ -288,7 +288,7 @@ export function patchCollectionItemsRoute(options: IDatabaseRouterOptions) {
 }
 
 export function deleteCollectionItemsRoute(options: IDatabaseRouterOptions) {
-    return async function deleteCollectionItemsRouteHandler(ctx: Koa.Context) {
+    return async function deleteCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const result = await databaseFunctions.deleteCollectionItems(
             params.database,
@@ -302,7 +302,7 @@ export function deleteCollectionItemsRoute(options: IDatabaseRouterOptions) {
 
 // TODO - getItem queryString support for $fields
 export function getCollectionItemRoute(options: IDatabaseRouterOptions) {
-    return async function getCollectionItemRouteHandler(ctx: Koa.Context) {
+    return async function getCollectionItemRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const result = await databaseFunctions.getCollectionItem(params.database, params.collection, params.id)
         ctx.status = result.status
@@ -358,7 +358,7 @@ export function putCollectionItemRoute(options: IDatabaseRouterOptions) {
 }
 
 export function patchCollectionItemRoute(options: IDatabaseRouterOptions) {
-    return async function patchCollectionItemRoutehandler(ctx: Koa.Context) {
+    return async function patchCollectionItemRoutehandler(ctx: Koa.ParameterizedContext<IParams>) {
         ctx.assert(!Array.isArray(ctx.request.body), 400, 'request body cannot be an array')
         const params: IParams = ctx.state
         ctx.status = await databaseFunctions.patchCollectionItem(
@@ -389,7 +389,7 @@ function convertPatch(patch: any) {
 }
 
 export function deleteCollectionItemRoute(options: IDatabaseRouterOptions) {
-    return async function deleteCollectionItemRouteHandler(ctx: Koa.Context) {
+    return async function deleteCollectionItemRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         ctx.status = await databaseFunctions.deleteCollectionItem(params.database, params.collection, params.id)
         if (ctx.status !== 404) {
@@ -399,7 +399,7 @@ export function deleteCollectionItemRoute(options: IDatabaseRouterOptions) {
 }
 
 export function getCollectionSchemaRoute(options: IDatabaseRouterOptions) {
-    return async function getCollectionSchemaRouteHandler(ctx: Koa.Context) {
+    return async function getCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const result = await databaseFunctions.getCollectionSchema(params.database, params.collection)
         ctx.status = result.status
@@ -410,7 +410,7 @@ export function getCollectionSchemaRoute(options: IDatabaseRouterOptions) {
 }
 
 export function putCollectionSchemaRoute(options: IDatabaseRouterOptions) {
-    return async function putCollectionSchemaRouteHandler(ctx: Koa.Context) {
+    return async function putCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const result = await databaseFunctions.putCollectionSchema(params.database, params.collection, ctx.request.body)
         ctx.status = result.status
@@ -421,7 +421,7 @@ export function putCollectionSchemaRoute(options: IDatabaseRouterOptions) {
 }
 
 export function deleteCollectionSchemaRoute(options: IDatabaseRouterOptions) {
-    return async function deleteCollectionSchemaRouteHandler(ctx: Koa.Context) {
+    return async function deleteCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         ctx.status = await databaseFunctions.deleteCollectionSchema(params.database, params.collection)
         if (ctx.status !== 404 && ctx.status !== 204) {
