@@ -97,7 +97,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const inserted: string[] = []
         const unchanged: string[] = []
         const failed: string[] = []
-        let promises: Array<Promise<any>> = []
+        let promises: Promise<any>[] = []
         let activeCount = 0
         let paused = false
 

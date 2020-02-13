@@ -119,10 +119,7 @@ async function getCollectionItemsStream(
     }
 
     const pipe: any = (destination: NodeJS.WritableStream, options?: { end?: boolean }) =>
-        cursor.pipe(
-            destination,
-            options
-        )
+        cursor.pipe(destination, options)
 
     return {
         count,
@@ -164,7 +161,7 @@ async function putCollectionItemsStream(
     const insertedIDs: ObjectID[] = []
     const unchangedIDs: ObjectID[] = []
     const failedIDs: ObjectID[] = []
-    const promises: Array<Promise<any>> = []
+    const promises: Promise<any>[] = []
     const maxAsyncCalls = 100 // TODO allow this to be passed in ... maybe query.concurrency?
     let activeCount = 0
     let paused = false
@@ -259,10 +256,12 @@ async function putCollectionItemsStream(
             $and: [query.filter, deleteFilter]
         }
     }
-    const deleteIDs = (await collection
-        .find(deleteFilter)
-        .project({ _id: 1 })
-        .toArray()).map(item => item._id)
+    const deleteIDs = (
+        await collection
+            .find(deleteFilter)
+            .project({ _id: 1 })
+            .toArray()
+    ).map(item => item._id)
     await collection.deleteMany({ _id: { $in: deleteIDs } })
 
     const response: IPutItemsResponse = {

@@ -19,7 +19,7 @@ export function getMongoClient(createConnection: boolean = true): Promise<MongoC
             ignoreUndefined: true,
             // bufferMaxEntries: 0,
             useNewUrlParser: true,
-            reconnectTries: Number.MAX_VALUE,
+            // reconnectTries: Number.MAX_VALUE,
             useUnifiedTopology: true
         }).catch(
             /* istanbul ignore next */

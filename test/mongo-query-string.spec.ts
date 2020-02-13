@@ -307,7 +307,10 @@ describe('mongo-query-string', function() {
 
     it('should parse ?$sort=abc,-def', async function() {
         expect(parseQueryString('$sort=abc,-def')).toEqual({
-            sort: [['abc', 1], ['def', -1]],
+            sort: [
+                ['abc', 1],
+                ['def', -1]
+            ],
             filter: {}
         })
     })
