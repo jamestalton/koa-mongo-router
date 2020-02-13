@@ -37,14 +37,14 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const collectionQuery = parseQueryString(ctx.request.querystring)
 
         if (collectionQuery.explain) {
-            const result = await databaseFunctions.getCollectionItemsExplain(
+            const explanation = await databaseFunctions.getCollectionItemsExplain(
                 params.database,
                 params.collection,
                 collectionQuery
             )
             ctx.body = {
                 query: collectionQuery,
-                explanation: result
+                explanation
             }
             return
         }

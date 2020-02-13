@@ -103,7 +103,7 @@ async function getCollectionItemsExplain(
     collectionQuery?: ICollectionQuery
 ) {
     const cursor = await getCollectionItemsCursor(databaseName, collectionName, collectionQuery)
-    return await cursor.explain()
+    return cursor.explain()
 }
 
 async function getCollectionItemsStream(
