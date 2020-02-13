@@ -26,7 +26,10 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     deleteCollectionItem,
     getCollectionSchema,
     putCollectionSchema,
-    deleteCollectionSchema
+    deleteCollectionSchema,
+    getCollectionIndices,
+    postCollectionIndex,
+    deleteCollectionIndex
 }
 
 async function getDatabases() {
@@ -448,6 +451,21 @@ async function deleteCollectionSchema(databaseName: string, collectionName: stri
     } catch {
         return 404
     }
+}
+
+async function getCollectionIndices(databaseName: string, collectionName: string) {
+    const collection = await getDatabaseCollection(databaseName, collectionName)
+    return collection.indexes()
+}
+
+async function postCollectionIndex(databaseName: string, collectionName: string, index: any) {
+    const collection = await getDatabaseCollection(databaseName, collectionName)
+    return collection.createIndex(index)
+}
+
+async function deleteCollectionIndex(databaseName: string, collectionName: string, id: string) {
+    const collection = await getDatabaseCollection(databaseName, collectionName)
+    return collection.dropIndex(id)
 }
 
 function convertFilter(filter: any) {

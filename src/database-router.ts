@@ -17,7 +17,10 @@ import {
     postCollectionItemsRoute,
     putCollectionItemRoute,
     putCollectionItemsRoute,
-    putCollectionSchemaRoute
+    putCollectionSchemaRoute,
+    getCollectionIndicesRoute,
+    postCollectionIndicesRoute,
+    deleteCollectionIndexRoute
 } from './database-routes'
 
 const bodyParser = BodyParser()
@@ -56,6 +59,9 @@ export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
         .get('/:database/:collection/schema', permissionCheck, getCollectionSchemaRoute(options))
         .put('/:database/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute(options))
         .delete('/:database/:collection/schema', permissionCheck, deleteCollectionSchemaRoute(options))
+        .get('/:database/:collection/indices', permissionCheck, getCollectionIndicesRoute(options))
+        .post('/:database/:collection/indices', permissionCheck, bodyParser, postCollectionIndicesRoute(options))
+        .delete('/:database/:collection/indices/:id', permissionCheck, deleteCollectionIndexRoute(options))
         .get('/:database/:collection/:id', permissionCheck, getCollectionItemRoute(options))
         .put('/:database/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute(options))
         .patch('/:database/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute(options))
@@ -99,6 +105,9 @@ export function getDatabaseRouter(databaseName: string, options?: IDatabaseRoute
         .get('/:collection/schema', permissionCheck, getCollectionSchemaRoute(options))
         .put('/:collection/schema', permissionCheck, bodyParser, putCollectionSchemaRoute(options))
         .delete('/:collection/schema', permissionCheck, deleteCollectionSchemaRoute(options))
+        .get('/:collection/indices', permissionCheck, getCollectionIndicesRoute(options))
+        .post('/:collection/indices', permissionCheck, bodyParser, postCollectionIndicesRoute(options))
+        .delete('/:collection/indices/:id', permissionCheck, deleteCollectionIndexRoute(options))
         .get('/:collection/:id', permissionCheck, getCollectionItemRoute(options))
         .put('/:collection/:id', permissionCheck, bodyParser, putCollectionItemRoute(options))
         .patch('/:collection/:id', permissionCheck, bodyParser, patchCollectionItemRoute(options))

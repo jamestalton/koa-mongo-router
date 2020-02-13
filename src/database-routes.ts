@@ -444,6 +444,34 @@ export function deleteCollectionSchemaRoute(options: IDatabaseRouterOptions) {
     }
 }
 
+export function getCollectionIndicesRoute(options: IDatabaseRouterOptions) {
+    return async function getCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
+        const params: IParams = ctx.state
+        const result = await databaseFunctions.getCollectionIndices(params.database, params.collection)
+        ctx.body = result
+    }
+}
+
+export function postCollectionIndicesRoute(options: IDatabaseRouterOptions) {
+    return async function getCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
+        const params: IParams = ctx.state
+        const result = await databaseFunctions.postCollectionIndex(params.database, params.collection, ctx.request.body)
+        ctx.body = result
+    }
+}
+
+export function deleteCollectionIndexRoute(options: IDatabaseRouterOptions) {
+    return async function getCollectionSchemaRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
+        const params: IParams = ctx.state
+        try {
+            const result = await databaseFunctions.deleteCollectionIndex(params.database, params.collection, params.id)
+            ctx.body = result
+        } catch {
+            ctx.status = 404
+        }
+    }
+}
+
 export interface IParams {
     database: string
     collection: string

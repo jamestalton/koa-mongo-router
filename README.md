@@ -67,34 +67,26 @@ const app = new Koa()
 
 ## Mongo Routes
 
-| Method | Route                         | Description                                                    | Notes                                             |
-| -----: | ----------------------------- | -------------------------------------------------------------- | ------------------------------------------------- |
-|    GET | /                             | [Get databases]()                                              |                                                   |
-|    GET | /:database                    | [Get database collections]()                                   |                                                   |
-| DELETE | /:database                    | [Delete database]()                                            |                                                   |
-|    GET | /:database/:collection        | [Get collection items](#Get-Items)                             | [Query String](#Query-String)                     |
-|   POST | /:database/:collection        | [Create a collection item](#Create-An-Item)                    |
-|    PUT | /:database/:collection        | [Create or replace collection items](#Create-Or-Replace-Items) | [Query String Filtering](#Query-String-Filtering) |
-|  PATCH | /:database/:collection        | [Update collection items](#Update-Items)                       | [Query String Filtering](#Query-String-Filtering) |
-| DELETE | /:database/:collection        | [Delete collection items](#Delete-Items)                       | [Query String Filtering](#Query-String-Filtering) |
-|    GET | /:database/:collection/:id    | [Get a collection item](#Get-An-Item)                          |
-|    PUT | /:database/:collection/:id    | [Create or replace a collection item](#Get-Or-Replace-An-Item) |
-|  PATCH | /:database/:collection/:id    | [Update a collection item](#Update-An-Item)                    |
-| DELETE | /:database/:collection/:id    | [Delete a collection item](#Delete-An-Item)                    |
-|    GET | /:database/:collection/schema | [Get collection schema](#)                                     |
-|    PUT | /:database/:collection/schema | [Put collection schema](#)                                     |
-| DELETE | /:database/:collection/schema | [Delete collection schema](#)                                  |
-
-<!--
-|    GET | /:database/:collection/indices     | [Get collection indices](#)                          |
-|    GET | /:database/:collection/indices/:id | [Get an index](#)                                    |
-|    PUT | /:database/:collection/indices/:id | [Create or replace an index](#)                      |
-| DELETE | /:database/:collection/indices/:id | [Delete an index](#)                                 |
-|    GET | /:database/:collection/embeds      | [Get collection embeds](#)                           |
-|    GET | /:database/:collection/embeds/:id  | [Get an index](#)                                    |
-|    PUT | /:database/:collection/embeds/:id  | [Create embed replace an embed](#)                   |
-| DELETE | /:database/:collection/embeds/:id  | [Delete an embed](#)                                 |
--->
+| Method | Route                                | Description                                                    | Notes                                             |
+| -----: | ------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------- |
+|    GET | /                                    | [Get databases]()                                              |                                                   |
+|    GET | /:database                           | [Get database collections]()                                   |                                                   |
+| DELETE | /:database                           | [Delete database]()                                            |                                                   |
+|    GET | /:database/:collection               | [Get collection items](#Get-Items)                             | [Query String](#Query-String)                     |
+|   POST | /:database/:collection               | [Create a collection item](#Create-An-Item)                    |
+|    PUT | /:database/:collection               | [Create or replace collection items](#Create-Or-Replace-Items) | [Query String Filtering](#Query-String-Filtering) |
+|  PATCH | /:database/:collection               | [Update collection items](#Update-Items)                       | [Query String Filtering](#Query-String-Filtering) |
+| DELETE | /:database/:collection               | [Delete collection items](#Delete-Items)                       | [Query String Filtering](#Query-String-Filtering) |
+|    GET | /:database/:collection/:id           | [Get a collection item](#Get-An-Item)                          |
+|    PUT | /:database/:collection/:id           | [Create or replace a collection item](#Get-Or-Replace-An-Item) |
+|  PATCH | /:database/:collection/:id           | [Update a collection item](#Update-An-Item)                    |
+| DELETE | /:database/:collection/:id           | [Delete a collection item](#Delete-An-Item)                    |
+|    GET | /:database/:collection/schema        | [Get collection schema](#)                                     |
+|    PUT | /:database/:collection/schema        | [Put collection schema](#)                                     |
+| DELETE | /:database/:collection/schema        | [Delete collection schema](#)                                  |
+|    GET | /:database/:collection/indices       | Get collection indices                                         |
+|   POST | /:database/:collection/indices       | Create collection index                                        |
+| DELETE | /:database/:collection/indices/:name | Delete collection index                                        |
 
 ## Get Items
 

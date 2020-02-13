@@ -128,4 +128,10 @@ export interface IDatabaseFunctions {
     }>
 
     deleteCollectionSchema: (databaseName: string, collectionName: string) => Promise<number>
+
+    getCollectionIndices: (databaseName: string, collectionName: string) => Promise<any>
+
+    postCollectionIndex: (databaseName: string, collectionName: string, index: any) => Promise<any>
+
+    deleteCollectionIndex: (databaseName: string, collectionName: string, id: string) => Promise<any>
 }
