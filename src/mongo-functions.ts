@@ -10,6 +10,7 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     getDatabases,
     getDatabaseCollections,
     deleteDatabase,
+    getCollectionItemsExplain,
     getCollectionItemsStream,
     getCollectionItems,
     putCollectionItems,
@@ -94,6 +95,15 @@ async function getCollectionItemsCursor(databaseName: string, collectionName: st
         cursor.project(query.fields)
     }
     return cursor
+}
+
+async function getCollectionItemsExplain(
+    databaseName: string,
+    collectionName: string,
+    collectionQuery?: ICollectionQuery
+) {
+    const cursor = await getCollectionItemsCursor(databaseName, collectionName, collectionQuery)
+    return await cursor.explain()
 }
 
 async function getCollectionItemsStream(

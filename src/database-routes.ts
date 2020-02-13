@@ -35,6 +35,20 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
     return async function getCollectionItemsRouteHandler(ctx: Koa.ParameterizedContext<IParams>) {
         const params: IParams = ctx.state
         const collectionQuery = parseQueryString(ctx.request.querystring)
+
+        if (collectionQuery.explain) {
+            const result = await databaseFunctions.getCollectionItemsExplain(
+                params.database,
+                params.collection,
+                collectionQuery
+            )
+            ctx.body = {
+                query: collectionQuery,
+                explanation: result
+            }
+            return
+        }
+
         const result = await databaseFunctions.getCollectionItemsStream(
             params.database,
             params.collection,

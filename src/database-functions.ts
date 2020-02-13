@@ -16,6 +16,12 @@ export interface IDatabaseFunctions {
 
     deleteDatabase: (databaseName: string) => Promise<number>
 
+    getCollectionItemsExplain: (
+        databaseName: string,
+        collectionName: string,
+        collectionQuery?: ICollectionQuery
+    ) => Promise<any>
+
     getCollectionItemsStream: (
         databaseName: string,
         collectionName: string,

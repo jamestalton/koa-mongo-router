@@ -10,6 +10,7 @@ export interface ICollectionQuery {
     filter: any
     invalid?: boolean
     valid?: boolean
+    explain?: boolean
 }
 
 function getValue(value: any) {
