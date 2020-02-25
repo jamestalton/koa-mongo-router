@@ -29,7 +29,7 @@
         "update": "npm run clean && ncu -u && npm install && npm test"
     },
     "dependencies": {
-        "@types/koa": "^2.11.1",
+        "@types/koa": "^2.11.2",
         "@types/koa-bodyparser": "^4.3.0",
         "@types/koa-router": "^7.4.0",
         "@types/mongodb": "^3.3.16",
@@ -39,7 +39,7 @@
         "koa-bodyparser": "^4.2.1",
         "koa-router": "^8.0.8",
         "mongodb": "^3.5.3",
-        "node-server-utils": "0.0.87",
+        "node-server-utils": "0.0.88",
         "r7insight_node": "^2.0.0"
     },
     "devDependencies": {
