@@ -38,7 +38,7 @@
         "koa": "^2.11.0",
         "koa-bodyparser": "^4.2.1",
         "koa-router": "^8.0.8",
-        "mongodb": "^3.5.3",
+        "mongodb": "^3.5.4",
         "node-server-utils": "0.0.88",
         "r7insight_node": "^2.0.0"
     },
