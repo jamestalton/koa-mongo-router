@@ -1,4 +1,5 @@
 import { parse } from 'querystring'
+import { FilterQuery } from 'mongodb'
 
 export interface ICollectionQuery {
     limit?: number
@@ -7,7 +8,7 @@ export interface ICollectionQuery {
     sort?: any
     embed?: string[]
     count?: boolean
-    filter: any
+    filter: FilterQuery<any>
     invalid?: boolean
     valid?: boolean
     explain?: boolean

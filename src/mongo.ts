@@ -1,4 +1,4 @@
-import { Collection, Db, MongoClient, MongoError, Mongos, ReplSet, Server } from 'mongodb'
+import { Collection, Db, MongoClient, MongoError, Mongos, ReplSet, Server, MongoClientOptions } from 'mongodb'
 import { logger } from 'node-server-utils'
 
 let mongoConnectionString = 'mongodb://localhost:27017'
@@ -8,20 +8,32 @@ if (process.env.MONGO_CONNECTION_STRING != undefined) {
 
 let mongoClientPromise: Promise<MongoClient>
 
-export function getMongoClient(createConnection: boolean = true): Promise<MongoClient> {
+export function getMongoClient(
+    createConnection: boolean = true,
+    options?: Partial<MongoClientOptions>
+): Promise<MongoClient> {
     if (mongoClientPromise == undefined) {
         /* istanbul ignore next */
         if (!createConnection) {
             return Promise.reject(new Error('No connection'))
         }
 
-        mongoClientPromise = MongoClient.connect(mongoConnectionString, {
+        let clientOptions: MongoClientOptions = {
             ignoreUndefined: true,
             // bufferMaxEntries: 0,
             useNewUrlParser: true,
             // reconnectTries: Number.MAX_VALUE,
             useUnifiedTopology: true
-        }).catch(
+        }
+
+        if (options != undefined) {
+            clientOptions = {
+                ...clientOptions,
+                ...options
+            }
+        }
+
+        mongoClientPromise = MongoClient.connect(mongoConnectionString, clientOptions).catch(
             /* istanbul ignore next */
             err => {
                 mongoClientPromise = undefined

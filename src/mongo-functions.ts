@@ -254,7 +254,7 @@ async function putCollectionItemsStream(
     await Promise.all(promises)
 
     let deleteFilter: any = { _id: { $nin: objectIDs } }
-    if (query.filter && Object.keys(query.filter).length > 0) {
+    if (query.filter !== undefined && Object.keys(query.filter).length > 0) {
         deleteFilter = {
             $and: [query.filter, deleteFilter]
         }

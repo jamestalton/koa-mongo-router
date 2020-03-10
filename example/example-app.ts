@@ -1,9 +1,7 @@
 import { Server } from 'http'
 import * as Koa from 'koa'
 import { createAppServer, shutdownAppServer } from 'node-server-utils' // tslint:disable-line
-import { getDatabasesRouter, koaErrorHandler, koaLogger } from '../src'
-import { IDatabaseRouterOptions } from '../src/database-router-options'
-import { closeDatabases } from '../src/mongo'
+import { getDatabasesRouter, koaErrorHandler, koaLogger, IDatabaseRouterOptions, closeDatabases } from '../src'
 
 let server: Server
 
