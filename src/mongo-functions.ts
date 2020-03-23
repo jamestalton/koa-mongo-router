@@ -29,7 +29,7 @@ export const mongoDatabaseFunctions: IDatabaseFunctions = {
     deleteCollectionSchema,
     getCollectionIndices,
     postCollectionIndex,
-    deleteCollectionIndex
+    deleteCollectionIndex,
 }
 
 async function getDatabases() {
@@ -41,10 +41,10 @@ async function getDatabaseCollections(databaseName: string) {
     const db = await getDatabase(databaseName)
     const collections = await db.collections()
     return Promise.all(
-        collections.map(async collection => {
+        collections.map(async (collection) => {
             return {
                 ...{ name: collection.collectionName },
-                ...(await collection.stats())
+                ...(await collection.stats()),
             }
         })
     )
@@ -74,11 +74,11 @@ async function getCollectionItemsCursor(databaseName: string, collectionName: st
         if (schema != undefined) {
             if (query.invalid === true) {
                 query.filter = {
-                    $and: [query.filter, { $nor: [{ $jsonSchema: schema }] }]
+                    $and: [query.filter, { $nor: [{ $jsonSchema: schema }] }],
                 }
             } else {
                 query.filter = {
-                    $and: [query.filter, { $jsonSchema: schema }]
+                    $and: [query.filter, { $jsonSchema: schema }],
                 }
             }
         }
@@ -126,7 +126,7 @@ async function getCollectionItemsStream(
 
     return {
         count,
-        pipe
+        pipe,
     }
 }
 
@@ -171,7 +171,7 @@ async function putCollectionItemsStream(
     try {
         await new Promise((resolve, reject) => {
             const jsonStream = JSONStream.parse('*')
-                .on('data', function(item: any) {
+                .on('data', function (item: any) {
                     if (typeof item === 'string') {
                         reject(new Error('Bad Request'))
                         return
@@ -184,9 +184,9 @@ async function putCollectionItemsStream(
                         promises.push(
                             collection
                                 .replaceOne({ _id: item._id }, item, {
-                                    upsert: true
+                                    upsert: true,
                                 })
-                                .then(result => {
+                                .then((result) => {
                                     if (result.upsertedCount === 1) {
                                         insertedIDs.push(item._id)
                                     } else if (result.modifiedCount === 1) {
@@ -210,7 +210,7 @@ async function putCollectionItemsStream(
                         promises.push(
                             collection
                                 .insertOne(item)
-                                .then(result => {
+                                .then((result) => {
                                     insertedIDs.push(result.insertedId)
                                     objectIDs.push(result.insertedId)
                                 })
@@ -236,11 +236,11 @@ async function putCollectionItemsStream(
                 .on(
                     'error',
                     /* istanbul ignore next */
-                    function(err: Error) {
+                    function (err: Error) {
                         reject(err)
                     }
                 )
-                .on('end', function() {
+                .on('end', function () {
                     resolve()
                 })
 
@@ -248,7 +248,7 @@ async function putCollectionItemsStream(
         })
     } catch (err) {
         return {
-            status: 400
+            status: 400,
         }
     }
     await Promise.all(promises)
@@ -256,28 +256,23 @@ async function putCollectionItemsStream(
     let deleteFilter: any = { _id: { $nin: objectIDs } }
     if (query.filter !== undefined && Object.keys(query.filter).length > 0) {
         deleteFilter = {
-            $and: [query.filter, deleteFilter]
+            $and: [query.filter, deleteFilter],
         }
     }
-    const deleteIDs = (
-        await collection
-            .find(deleteFilter)
-            .project({ _id: 1 })
-            .toArray()
-    ).map(item => item._id)
+    const deleteIDs = (await collection.find(deleteFilter).project({ _id: 1 }).toArray()).map((item) => item._id)
     await collection.deleteMany({ _id: { $in: deleteIDs } })
 
     const response: IPutItemsResponse = {
-        inserted: insertedIDs.map(id => id.toHexString()),
-        modified: modifiedIDs.map(id => id.toHexString()),
-        unchanged: unchangedIDs.map(id => id.toHexString()),
-        deleted: deleteIDs.map(id => id.toHexString()),
-        failed: failedIDs.map(id => id.toHexString())
+        inserted: insertedIDs.map((id) => id.toHexString()),
+        modified: modifiedIDs.map((id) => id.toHexString()),
+        unchanged: unchangedIDs.map((id) => id.toHexString()),
+        deleted: deleteIDs.map((id) => id.toHexString()),
+        failed: failedIDs.map((id) => id.toHexString()),
     }
 
     return {
         status: 200,
-        response
+        response,
     }
 }
 
@@ -286,7 +281,7 @@ async function postCollectionItems(databaseName: string, collectionName: string,
     const result = await collection.insertOne(item)
     return {
         status: 201,
-        _id: result.insertedId.toHexString()
+        _id: result.insertedId.toHexString(),
     }
 }
 
@@ -297,7 +292,7 @@ async function patchCollectionItems(databaseName: string, collectionName: string
     return {
         status: 200,
         matchedCount: result.matchedCount,
-        modifiedCount: result.modifiedCount
+        modifiedCount: result.modifiedCount,
     }
 }
 
@@ -307,7 +302,7 @@ async function deleteCollectionItems(databaseName: string, collectionName: strin
     const result = await collection.deleteMany(query.filter)
     return {
         status: 200,
-        deletedCount: result.deletedCount
+        deletedCount: result.deletedCount,
     }
 }
 
@@ -316,12 +311,12 @@ async function getCollectionItem(databaseName: string, collectionName: string, i
     const item = await collection.findOne({ _id: new ObjectID(id) })
     if (item == undefined) {
         return {
-            status: 404
+            status: 404,
         }
     } else {
         return {
             status: 200,
-            item
+            item,
         }
     }
 }
@@ -347,7 +342,7 @@ async function putCollectionItemOnlyIfAlreadyExists(
     const collection = await getDatabaseCollection(databaseName, collectionName)
     item._id = new ObjectID(id)
     const result = await collection.replaceOne({ _id: item._id }, item, {
-        upsert: false
+        upsert: false,
     })
     if (result.modifiedCount === 1) {
         return 200
@@ -405,11 +400,11 @@ async function getCollectionSchema(databaseName: string, collectionName: string)
     ) {
         return {
             status: 200,
-            schema: collectionInfos[0].options.validator.$jsonSchema
+            schema: collectionInfos[0].options.validator.$jsonSchema,
         }
     } else {
         return {
-            status: 404
+            status: 404,
         }
     }
 }
@@ -421,19 +416,19 @@ async function putCollectionSchema(databaseName: string, collectionName: string,
         const result = await db.command({
             collMod: collectionName,
             validator: {
-                $jsonSchema: schema
+                $jsonSchema: schema,
             },
             validationLevel: 'strict',
-            validationAction: 'error'
+            validationAction: 'error',
         })
         return {
             status: 200,
-            result
+            result,
         }
     } catch (err) {
         return {
             status: 400,
-            error: err.message
+            error: err.message,
         }
     }
 }
@@ -445,7 +440,7 @@ async function deleteCollectionSchema(databaseName: string, collectionName: stri
             collMod: collectionName,
             validator: {},
             validationLevel: 'off',
-            validationAction: 'warn'
+            validationAction: 'warn',
         })
         return 200
     } catch {

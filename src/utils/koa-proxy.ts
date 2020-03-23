@@ -19,7 +19,7 @@ export function koaProxy(ctx: Koa.Context, sourceUrl: string, headers?: { [heade
     if (headers != undefined) {
         requestOptions.headers = {
             ...requestOptions.headers,
-            ...headers
+            ...headers,
         }
     }
     return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ export function koaProxy(ctx: Koa.Context, sourceUrl: string, headers?: { [heade
         } catch (err) {
             logger.error({
                 message: 'proxy get route error',
-                error: err.message
+                error: err.message,
             })
             reject(err)
         }

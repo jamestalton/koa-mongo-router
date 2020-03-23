@@ -10,12 +10,12 @@ const collection = `items`
 let request: axios.AxiosInstance
 let server: Server
 
-beforeAll(async function() {
+beforeAll(async function () {
     server = await startApp()
     const port = (server.address() as AddressInfo).port
     request = axios.default.create({
         baseURL: `http://localhost:${port}/`,
-        validateStatus: () => true
+        validateStatus: () => true,
     })
 })
 
@@ -23,7 +23,7 @@ beforeEach(async () => {
     await request.delete(`/${database}`)
 })
 
-afterAll(async function() {
+afterAll(async function () {
     await request.delete(`/${database}`)
     await stopApp()
 })
@@ -39,12 +39,12 @@ const schema: any = {
     required: ['name', 'group'],
     properties: {
         name: {
-            type: 'string'
+            type: 'string',
         },
         group: {
-            type: 'number'
-        }
-    }
+            type: 'number',
+        },
+    },
 }
 
 function createMockItemID(index: number = 0) {
@@ -54,7 +54,7 @@ function createMockItemID(index: number = 0) {
 function getMockItem(generateID = false, index: number = 1) {
     const mockItem: IMockItem = {
         name: `Item ${index}`,
-        group: (index % 2) + 1
+        group: (index % 2) + 1,
     }
     if (generateID) {
         mockItem._id = createMockItemID(index)
@@ -70,8 +70,8 @@ function getMockItems(count = 4) {
     return mockItems
 }
 
-describe(`GET /:database/:collection`, function() {
-    it(`should return status 200 'OK' and an array of the items`, async function() {
+describe(`GET /:database/:collection`, function () {
+    it(`should return status 200 'OK' and an array of the items`, async function () {
         const mockItems = getMockItems()
 
         let response = await request.put(`/${database}/${collection}`, mockItems)
@@ -85,17 +85,17 @@ describe(`GET /:database/:collection`, function() {
         expect(response.data).toEqual(mockItems)
     })
 
-    it(`with filter should return status 200 and an array of filtered items`, async function() {
+    it(`with filter should return status 200 and an array of filtered items`, async function () {
         const mockItems = getMockItems()
 
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
 
         const response = await request.get(`/${database}/${collection}?group=1&$sort=name&$fields=-_id`)
         expect(response.status).toEqual(200)
-        expect(response.data).toEqual(mockItems.filter(item => item.group === 1))
+        expect(response.data).toEqual(mockItems.filter((item) => item.group === 1))
     })
 
-    it(`with $skip should return status 200 and an array of items with a skip offset`, async function() {
+    it(`with $skip should return status 200 and an array of items with a skip offset`, async function () {
         const mockItems = getMockItems()
         const skip = Math.round(mockItems.length / 2)
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
@@ -104,7 +104,7 @@ describe(`GET /:database/:collection`, function() {
         expect(response.data).toEqual(mockItems.slice(skip))
     })
 
-    it(`with $limit should return status 200 and an array of items limited by length`, async function() {
+    it(`with $limit should return status 200 and an array of items limited by length`, async function () {
         const mockItems = getMockItems()
         const limit = Math.round(mockItems.length / 2)
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
@@ -113,7 +113,7 @@ describe(`GET /:database/:collection`, function() {
         expect(response.data).toEqual(mockItems.slice(0, limit))
     })
 
-    it(`with $sort should return status 200 and an array of sorted items`, async function() {
+    it(`with $sort should return status 200 and an array of sorted items`, async function () {
         const mockItems = getMockItems()
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
         let response = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
@@ -125,8 +125,8 @@ describe(`GET /:database/:collection`, function() {
     })
 })
 
-describe(`PUT /:database/:collection`, function() {
-    it(`should return status 200 'OK' and create collection`, async function() {
+describe(`PUT /:database/:collection`, function () {
+    it(`should return status 200 'OK' and create collection`, async function () {
         const mockItems = getMockItems()
 
         const putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, mockItems)
@@ -141,7 +141,7 @@ describe(`PUT /:database/:collection`, function() {
         expect(getResponse.data).toEqual(mockItems)
     })
 
-    it(`should return status 200 'OK' and delete the old items`, async function() {
+    it(`should return status 200 'OK' and delete the old items`, async function () {
         const mockItems = getMockItems()
 
         let putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, mockItems)
@@ -169,21 +169,21 @@ describe(`PUT /:database/:collection`, function() {
     })
 })
 
-describe(`POST /:database/:collection`, function() {
-    it(`should return status 201 'Created' and create the item`, async function() {
+describe(`POST /:database/:collection`, function () {
+    it(`should return status 201 'Created' and create the item`, async function () {
         const mockItem = getMockItem()
         const response = await request.post<IMockItem>(`/${database}/${collection}`, mockItem)
         expect(response.status).toEqual(201)
         expect((await request.get(`/${database}/${collection}/${response.data._id}`)).status).toEqual(200)
     })
 
-    it(`should return status 400 'Bad Request' if the body contains an _id`, async function() {
+    it(`should return status 400 'Bad Request' if the body contains an _id`, async function () {
         const mockItem = getMockItem(true)
         const response = await request.post(`/${database}/${collection}`, mockItem)
         expect(response.status).toEqual(400)
     })
 
-    it(`should return status 400 'Bad Request' if the body is an array`, async function() {
+    it(`should return status 400 'Bad Request' if the body is an array`, async function () {
         const response = await request.post(`/${database}/${collection}`, [])
         expect(response.status).toEqual(400)
     })
@@ -211,8 +211,8 @@ describe(`POST /:database/:collection`, function() {
     // })
 })
 
-describe(`PATCH /:database/:collection`, function() {
-    it(`should return status 200 'OK' and patch the items`, async function() {
+describe(`PATCH /:database/:collection`, function () {
+    it(`should return status 200 'OK' and patch the items`, async function () {
         const mockItems = getMockItems()
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
         expect((await request.patch(`/${database}/${collection}`, { name: `test` })).status).toEqual(200)
@@ -224,8 +224,8 @@ describe(`PATCH /:database/:collection`, function() {
     })
 })
 
-describe(`DELETE /:database/:collection`, function() {
-    it(`should return status 200 'OK' and delete the collection`, async function() {
+describe(`DELETE /:database/:collection`, function () {
+    it(`should return status 200 'OK' and delete the collection`, async function () {
         const mockItem = getMockItem()
         expect((await request.put(`/${database}/${collection}`, [mockItem])).status).toEqual(200)
         expect((await request.get(`/${database}/${collection}`)).data.length).toEqual(1)
@@ -233,18 +233,18 @@ describe(`DELETE /:database/:collection`, function() {
         expect((await request.get(`/${database}/${collection}`)).data.length).toEqual(0)
     })
 
-    it(`should return status 200 'OK' and delete the filtered items`, async function() {
+    it(`should return status 200 'OK' and delete the filtered items`, async function () {
         const mockItems = getMockItems()
         expect((await request.put(`/${database}/${collection}`, mockItems)).status).toEqual(200)
         expect((await request.delete(`/${database}/${collection}?group=1`)).status).toEqual(200)
         expect((await request.get(`/${database}/${collection}`)).data.length).toEqual(
-            mockItems.filter(item => item.group !== 1).length
+            mockItems.filter((item) => item.group !== 1).length
         )
     })
 })
 
-describe(`GET /:database/:collection/:id`, function() {
-    it(`should return status 200 'OK' and the item`, async function() {
+describe(`GET /:database/:collection/:id`, function () {
+    it(`should return status 200 'OK' and the item`, async function () {
         const mockItem = getMockItem()
         const putResponse = await request.put<IPutItemsResponse>(`/${database}/${collection}`, [mockItem])
         expect(putResponse.status).toEqual(200)
@@ -256,7 +256,7 @@ describe(`GET /:database/:collection/:id`, function() {
         expect(getResponse.data.name).toEqual(mockItem.name)
     })
 
-    it(`should return status 404 'Not Found' if the item does not exist`, async function() {
+    it(`should return status 404 'Not Found' if the item does not exist`, async function () {
         const itemID = createMockItemID()
         expect((await request.get(`/${database}/${collection}/${itemID}`)).status).toEqual(404)
     })
@@ -288,15 +288,15 @@ describe(`GET /:database/:collection/:id`, function() {
     // })
 })
 
-describe(`PUT /:database/:collection/:id`, function() {
-    it(`should return status 201 'Created' and create the item`, async function() {
+describe(`PUT /:database/:collection/:id`, function () {
+    it(`should return status 201 'Created' and create the item`, async function () {
         const mockItem = getMockItem(true)
 
         const putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         expect(putResponse.status).toEqual(201)
     })
 
-    it(`should return status 200 'OK' and replace the item`, async function() {
+    it(`should return status 200 'OK' and replace the item`, async function () {
         const mockItem = getMockItem(true)
 
         let putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
@@ -308,7 +308,7 @@ describe(`PUT /:database/:collection/:id`, function() {
         expect(putResponse.status).toEqual(200)
     })
 
-    it(`should return status 204 'No Content' and if the item is not modified`, async function() {
+    it(`should return status 204 'No Content' and if the item is not modified`, async function () {
         const mockItem = getMockItem(true)
 
         let putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
@@ -321,73 +321,73 @@ describe(`PUT /:database/:collection/:id`, function() {
         expect(putResponse.status).toEqual(204)
     })
 
-    it(`should return status 201 'Created' if item does not exist and header 'if-none-match'`, async function() {
+    it(`should return status 201 'Created' if item does not exist and header 'if-none-match'`, async function () {
         const mockItem = getMockItem(true)
         const putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem, {
-            headers: { 'if-none-match': '*' }
+            headers: { 'if-none-match': '*' },
         })
         expect(putResponse.status).toEqual(201)
     })
 
-    it(`should return status 412 'Precondition Failed' if the item exists and header 'if-none-match'`, async function() {
+    it(`should return status 412 'Precondition Failed' if the item exists and header 'if-none-match'`, async function () {
         const mockItem = getMockItem(true)
         let putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         const getResponse = await request.get<IMockItem>(`/${database}/${collection}/${mockItem._id}`)
         putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, getResponse.data, {
-            headers: { 'if-none-match': '*' }
+            headers: { 'if-none-match': '*' },
         })
         expect(putResponse.status).toEqual(412)
     })
 
-    it(`should return status 200 'OK' if the item exists and header 'if-match'`, async function() {
+    it(`should return status 200 'OK' if the item exists and header 'if-match'`, async function () {
         const mockItem = getMockItem(true)
         let putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         mockItem.name = 'abc'
         putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem, {
-            headers: { 'if-match': '*' }
+            headers: { 'if-match': '*' },
         })
         expect(putResponse.status).toEqual(200)
     })
 
-    it(`should return status 204 'Not Modified' if the item exists but is not modified and header 'if-match'`, async function() {
+    it(`should return status 204 'Not Modified' if the item exists but is not modified and header 'if-match'`, async function () {
         const mockItem = getMockItem(true)
         let putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         const getResponse = await request.get<IMockItem>(`/${database}/${collection}/${mockItem._id}`)
         putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, getResponse.data, {
-            headers: { 'if-match': '*' }
+            headers: { 'if-match': '*' },
         })
         expect(putResponse.status).toEqual(204)
     })
 
-    it(`should return status 412 'Precondition Failed' if the item does not exist and header 'if-match'`, async function() {
+    it(`should return status 412 'Precondition Failed' if the item does not exist and header 'if-match'`, async function () {
         const mockItem = getMockItem(true)
         const putResponse = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem, {
-            headers: { 'if-match': '*' }
+            headers: { 'if-match': '*' },
         })
         expect(putResponse.status).toEqual(412)
     })
 })
 
-describe(`PATCH /:collection/:id`, function() {
-    it(`should return status 200 'OK' and patch the item`, async function() {
+describe(`PATCH /:collection/:id`, function () {
+    it(`should return status 200 'OK' and patch the item`, async function () {
         const itemID = createMockItemID()
         expect((await request.put(`/${database}/${collection}/${itemID}`, { name: `abc` })).status).toEqual(201)
         expect((await request.patch(`/${database}/${collection}/${itemID}`, { name: `test` })).status).toEqual(200)
         expect((await request.get(`/${database}/${collection}/${itemID}`)).data.name).toEqual(`test`)
     })
 
-    it(`should return status 204 'No Content' and if the item is not modified`, async function() {
+    it(`should return status 204 'No Content' and if the item is not modified`, async function () {
         const itemID = createMockItemID()
         expect((await request.put(`/${database}/${collection}/${itemID}`, { name: `abc` })).status).toEqual(201)
         expect((await request.patch(`/${database}/${collection}/${itemID}`, { name: `abc` })).status).toEqual(204)
     })
 
-    it(`should return status 404 'Not Found' if the item does not exist`, async function() {
+    it(`should return status 404 'Not Found' if the item does not exist`, async function () {
         const itemID = createMockItemID()
         expect((await request.patch(`/${database}/${collection}/${itemID}`, { name: `test` })).status).toEqual(404)
     })
 
-    it(`should return status 200 'OK' and patch the item with mongo operators`, async function() {
+    it(`should return status 200 'OK' and patch the item with mongo operators`, async function () {
         const itemID = createMockItemID()
         expect((await request.put(`/${database}/${collection}/${itemID}`, { name: `abc`, count: 2 })).status).toEqual(
             201
@@ -399,8 +399,8 @@ describe(`PATCH /:collection/:id`, function() {
     })
 })
 
-describe(`DELETE /:database/:collection/:id`, function() {
-    it(`should return status 200 'OK' and delete the item`, async function() {
+describe(`DELETE /:database/:collection/:id`, function () {
+    it(`should return status 200 'OK' and delete the item`, async function () {
         const mockItem = getMockItem(true)
         expect((await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)).status).toEqual(201)
         expect((await request.get(`/${database}/${collection}/${mockItem._id}`)).status).toEqual(200)
@@ -408,14 +408,14 @@ describe(`DELETE /:database/:collection/:id`, function() {
         expect((await request.get(`/${database}/${collection}/${mockItem._id}`)).status).toEqual(404)
     })
 
-    it(`should return status 404 'Not Found' if the item does not exist`, async function() {
+    it(`should return status 404 'Not Found' if the item does not exist`, async function () {
         const itemID = createMockItemID()
         expect((await request.delete(`/${database}/${collection}/${itemID}`)).status).toEqual(404)
     })
 })
 
-describe(`PUT /:database/:collection/schema`, function() {
-    it(`should return status 200 'OK' and put the collection schema`, async function() {
+describe(`PUT /:database/:collection/schema`, function () {
+    it(`should return status 200 'OK' and put the collection schema`, async function () {
         const mockItems = getMockItems()
 
         let response = await request.put(`/${database}/${collection}`, mockItems)
@@ -428,7 +428,7 @@ describe(`PUT /:database/:collection/schema`, function() {
         expect(response.headers['content-type']).toContain('application/json')
     })
 
-    it(`should enforce the schema on the put items`, async function() {
+    it(`should enforce the schema on the put items`, async function () {
         let response = await request.put(`/${database}/${collection}/schema`, schema)
         expect(response.status).toEqual(200)
         expect(response.headers['content-type']).toContain('application/json')
@@ -444,24 +444,24 @@ describe(`PUT /:database/:collection/schema`, function() {
         expect(response.data.inserted).toHaveLength(mockItems.length - 1)
     })
 
-    it(`should return status 400 'Bad Request' if the schema is not valid`, async function() {
+    it(`should return status 400 'Bad Request' if the schema is not valid`, async function () {
         expect((await request.put(`/${database}/${collection}/schema`, { type: 'abs' })).status).toEqual(400)
     })
 })
 
-describe(`GET /:database/:collection/schema`, function() {
-    it(`should return status 404 'Not Found' if the collection does not exist`, async function() {
+describe(`GET /:database/:collection/schema`, function () {
+    it(`should return status 404 'Not Found' if the collection does not exist`, async function () {
         expect((await request.get(`/${database}/${collection}/schema`)).status).toEqual(404)
     })
 
-    it(`should return status 200 'OK' and return the schema`, async function() {
+    it(`should return status 200 'OK' and return the schema`, async function () {
         expect((await request.put(`/${database}/${collection}/schema`, schema)).status).toEqual(200)
         expect((await request.get(`/${database}/${collection}/schema`)).data).toEqual(schema)
     })
 })
 
-describe(`DELETE /:database/:collection/schema`, function() {
-    it(`should return status 200 'OK' and delete the schema`, async function() {
+describe(`DELETE /:database/:collection/schema`, function () {
+    it(`should return status 200 'OK' and delete the schema`, async function () {
         expect((await request.put(`/${database}/${collection}/schema`, schema)).status).toEqual(200)
         expect((await request.delete(`/${database}/${collection}/schema`)).status).toEqual(200)
         expect((await request.get(`/${database}/${collection}/schema`)).status).toEqual(404)

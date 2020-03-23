@@ -20,7 +20,7 @@ import {
     putCollectionSchemaRoute,
     getCollectionIndicesRoute,
     postCollectionIndicesRoute,
-    deleteCollectionIndexRoute
+    deleteCollectionIndexRoute,
 } from './database-routes'
 
 const bodyParser = BodyParser()
@@ -44,7 +44,7 @@ export function getDatabasesRouter(options?: IDatabaseRouterOptions) {
         .param('database', async (database: string, ctx: Koa.Context, next: () => Promise<any>) => {
             ctx.state = {
                 ...ctx.state,
-                ...ctx.params
+                ...ctx.params,
             }
             await next()
         })
@@ -93,7 +93,7 @@ export function getDatabaseRouter(databaseName: string, options?: IDatabaseRoute
         .param('collection', async (collection: string, ctx: Koa.Context, next: () => Promise<any>) => {
             ctx.state = {
                 ...ctx.state,
-                ...ctx.params
+                ...ctx.params,
             }
             await next()
         })

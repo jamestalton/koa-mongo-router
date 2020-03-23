@@ -9,7 +9,7 @@ export async function koaErrorHandler(ctx: Koa.Context, next: () => void) {
         if (typeof err.status === 'number') {
             ctx.body = {
                 status: err.status,
-                message: STATUS_CODES[err.status]
+                message: STATUS_CODES[err.status],
             }
             ctx.status = err.status
             if (err != undefined) {
@@ -24,7 +24,7 @@ export async function koaErrorHandler(ctx: Koa.Context, next: () => void) {
             ctx.status = 500
             ctx.body = {
                 status: 500,
-                message: STATUS_CODES[500]
+                message: STATUS_CODES[500],
             }
             ctx.state.error = err
             if (err != undefined) {

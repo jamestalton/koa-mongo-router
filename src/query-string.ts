@@ -16,7 +16,7 @@ export interface ICollectionQuery {
 
 function getValue(value: any) {
     if (Array.isArray(value)) {
-        value = value.map(item => getValue(item))
+        value = value.map((item) => getValue(item))
     } else {
         if (value === '') {
             /* do nothing */
@@ -37,7 +37,7 @@ function getValue(value: any) {
 enum ValueFormat {
     Default,
     String,
-    Date
+    Date,
 }
 
 enum Operation {
@@ -52,7 +52,7 @@ enum Operation {
     NotExists,
     Contains,
     StartsWith,
-    EndsWith
+    EndsWith,
 }
 
 function getKeyValue(key: string, value: any, filter: any) {
@@ -131,7 +131,7 @@ function getKeyValue(key: string, value: any, filter: any) {
             break
         case ValueFormat.Date:
             if (Array.isArray(value)) {
-                value = value.map(item => {
+                value = value.map((item) => {
                     let dateAsNumber = Number(item)
                     /* istanbul ignore else */
                     if (isNaN(dateAsNumber)) {
@@ -251,7 +251,7 @@ export function parseQueryString(queryString: string): ICollectionQuery {
     }
 
     const mongoQuery: ICollectionQuery = {
-        filter: { $or: [] }
+        filter: { $or: [] },
     }
     for (const andQueryString of andQueryStrings) {
         const query = parseQuery(parse(andQueryString))

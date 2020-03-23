@@ -20,7 +20,7 @@ export async function koaLogger(ctx: Koa.Context, next: () => void) {
             message: STATUS_CODES[ctx.response.status],
             status: ctx.response.status,
             method: ctx.method,
-            url
+            url,
         }
 
         if (ctx.request.querystring != undefined && ctx.request.querystring !== '') {

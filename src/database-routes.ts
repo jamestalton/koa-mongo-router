@@ -44,7 +44,7 @@ export function getCollectionItemsRoute(options: IDatabaseRouterOptions) {
             )
             ctx.body = {
                 query: collectionQuery,
-                explanation
+                explanation,
             }
             return
         }
@@ -119,7 +119,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
         try {
             await new Promise((resolve, reject) => {
                 const jsonStream = JSONStream.parse('*')
-                    .on('data', function(item: any) {
+                    .on('data', function (item: any) {
                         if (typeof item === 'string') {
                             reject(new Error('Bad Request'))
                             return
@@ -128,7 +128,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
                         if (item._id != undefined) {
                             objectIDs.push(item._id)
                             promises.push(
-                                transform(item).then(transformedItem => {
+                                transform(item).then((transformedItem) => {
                                     return databaseFunctions
                                         .putCollectionItem(
                                             params.database,
@@ -136,7 +136,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
                                             transformedItem._id,
                                             transformedItem
                                         )
-                                        .then(status => {
+                                        .then((status) => {
                                             switch (status) {
                                                 case 200:
                                                     modified.push(transformedItem._id)
@@ -165,10 +165,10 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
                             )
                         } else {
                             promises.push(
-                                transform(item).then(transformedItem => {
+                                transform(item).then((transformedItem) => {
                                     return databaseFunctions
                                         .postCollectionItems(params.database, params.collection, transformedItem)
-                                        .then(result => {
+                                        .then((result) => {
                                             switch (result.status) {
                                                 case 201:
                                                     inserted.push(result._id)
@@ -200,11 +200,11 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
                     .on(
                         'error',
                         /* istanbul ignore next */
-                        function(err: Error) {
+                        function (err: Error) {
                             reject(err)
                         }
                     )
-                    .on('end', function() {
+                    .on('end', function () {
                         resolve()
                     })
 
@@ -212,7 +212,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
             })
         } catch (err) {
             return {
-                status: 400
+                status: 400,
             }
         }
         await Promise.all(promises)
@@ -222,19 +222,19 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
         const deleteQuery: ICollectionQuery = {
             filter: {
                 _id: {
-                    $nin: objectIDs
-                }
+                    $nin: objectIDs,
+                },
             },
             fields: {
-                _id: 1
-            }
+                _id: 1,
+            },
         }
         const deleteItems = await databaseFunctions.getCollectionItems(params.database, params.collection, deleteQuery)
         for (const deleteItem of deleteItems.items) {
             promises.push(
                 databaseFunctions
                     .deleteCollectionItem(params.database, params.collection, deleteItem._id)
-                    .then(status => {
+                    .then((status) => {
                         switch (status) {
                             case 200:
                                 deleted.push(deleteItem._id)
@@ -253,7 +253,7 @@ export function putCollectionItemsRoute(options: IDatabaseRouterOptions) {
             modified,
             unchanged,
             deleted,
-            failed
+            failed,
         }
 
         ctx.body = response
@@ -278,7 +278,7 @@ export function postCollectionItemsRoute(options: IDatabaseRouterOptions) {
 
         // TODO
         ctx.body = {
-            _id: result._id
+            _id: result._id,
         }
     }
 }
@@ -296,7 +296,7 @@ export function patchCollectionItemsRoute(options: IDatabaseRouterOptions) {
         ctx.status = result.status
         ctx.body = {
             matchedCount: result.matchedCount,
-            modifiedCount: result.modifiedCount
+            modifiedCount: result.modifiedCount,
         }
     }
 }

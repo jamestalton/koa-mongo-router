@@ -11,7 +11,7 @@ export function getLogEntriesLogger(logEntriesToken: string, hook?: (logObject: 
         region: 'eu',
         flatten: false,
         timestamp: false,
-        levels: ['debug', 'info', 'notice', 'warn', 'error', 'crit', 'alert', 'emerg']
+        levels: ['debug', 'info', 'notice', 'warn', 'error', 'crit', 'alert', 'emerg'],
     })
 
     const logEntriesLogger: ILogger = {
@@ -54,7 +54,7 @@ export function getLogEntriesLogger(logEntriesToken: string, hook?: (logObject: 
                 }
                 logEntriesInsightNode.error(logObject)
             }
-        }
+        },
     }
 
     return logEntriesLogger

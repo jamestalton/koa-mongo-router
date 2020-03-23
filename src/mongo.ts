@@ -23,19 +23,19 @@ export function getMongoClient(
             // bufferMaxEntries: 0,
             useNewUrlParser: true,
             // reconnectTries: Number.MAX_VALUE,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
         }
 
         if (options != undefined) {
             clientOptions = {
                 ...clientOptions,
-                ...options
+                ...options,
             }
         }
 
         mongoClientPromise = MongoClient.connect(mongoConnectionString, clientOptions).catch(
             /* istanbul ignore next */
-            err => {
+            (err) => {
                 mongoClientPromise = undefined
                 databases = {}
                 throw err
@@ -53,7 +53,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
         return databases[databaseName]
     }
 
-    const databasePromise: Promise<Db> = getMongoClient().then(function(mongoClient: MongoClient) {
+    const databasePromise: Promise<Db> = getMongoClient().then(function (mongoClient: MongoClient) {
         return mongoClient.db(databaseName)
     })
     databases[databaseName] = databasePromise
@@ -74,7 +74,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
     logger.debug({
         message: 'database connected',
         database: db.databaseName,
-        topology: databaseTopology
+        topology: databaseTopology,
     })
 
     db.on(
@@ -84,7 +84,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
             logger.error({
                 message: 'database error',
                 database: db.databaseName,
-                error: mongoError != undefined ? mongoError.message : undefined
+                error: mongoError != undefined ? mongoError.message : undefined,
             })
         }
     )
@@ -95,7 +95,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
                 logger.error({
                     message: 'database parseError',
                     database: db.databaseName,
-                    error: mongoError != undefined ? mongoError.message : undefined
+                    error: mongoError != undefined ? mongoError.message : undefined,
                 })
             }
         )
@@ -106,7 +106,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
                 logger.error({
                     message: 'database timeout',
                     database: db.databaseName,
-                    error: mongoError != undefined ? mongoError.message : undefined
+                    error: mongoError != undefined ? mongoError.message : undefined,
                 })
             }
         )
@@ -124,7 +124,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
                 logger.debug({
                     message: 'database closed',
                     database: db.databaseName,
-                    error: mongoError != undefined ? mongoError.message : undefined
+                    error: mongoError != undefined ? mongoError.message : undefined,
                 })
             }
         )
@@ -141,7 +141,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
             () => {
                 logger.error({
                     message: 'database reconnectFailed',
-                    database: db.databaseName
+                    database: db.databaseName,
                 })
             }
         )
@@ -151,7 +151,7 @@ export async function getDatabase(databaseName: string): Promise<Db> {
             () => {
                 logger.info({
                     message: 'database full setup',
-                    database: db.databaseName
+                    database: db.databaseName,
                 })
             }
         )
@@ -159,18 +159,18 @@ export async function getDatabase(databaseName: string): Promise<Db> {
     /* istanbul ignore next */
     if (db.serverConfig instanceof ReplSet) {
         const topology: any = (db as any).s.topology
-        topology.on('left', function(data: string) {
+        topology.on('left', function (data: string) {
             logger.info({
                 message: 'database replica set server left',
                 serverType: data,
-                database: db.databaseName
+                database: db.databaseName,
             })
         })
-        topology.on('joined', function(data: string) {
+        topology.on('joined', function (data: string) {
             logger.info({
                 message: 'database replica set server joined',
                 serverType: data,
-                database: db.databaseName
+                database: db.databaseName,
             })
         })
     }

@@ -11,13 +11,13 @@ const collection = `test-functions-collection`
 let request: axios.AxiosInstance
 let server: Server
 
-beforeAll(async function() {
+beforeAll(async function () {
     const options: IDatabaseRouterOptions = {}
     server = await startApp(options)
     const port = (server.address() as AddressInfo).port
     request = axios.default.create({
         baseURL: `http://localhost:${port}/`,
-        validateStatus: () => true
+        validateStatus: () => true,
     })
 })
 
@@ -25,7 +25,7 @@ beforeEach(async () => {
     await request.delete(`/${database}`)
 })
 
-afterAll(async function() {
+afterAll(async function () {
     await request.delete(`/${database}`)
     await stopApp()
 })
@@ -43,7 +43,7 @@ function createMockItemID(index: number = 0) {
 function getMockItem(generateID = false, index: number = 1) {
     const mockItem: IMockItem = {
         name: `Item ${index}`,
-        group: (index % 2) + 1
+        group: (index % 2) + 1,
     }
     if (generateID) {
         mockItem._id = createMockItemID(index)
@@ -59,8 +59,8 @@ function getMockItems(count = 4) {
     return mockItems
 }
 
-describe(`databaseFunctions.putCollectionItems`, function() {
-    it(`should work`, async function() {
+describe(`databaseFunctions.putCollectionItems`, function () {
+    it(`should work`, async function () {
         const mockItems = getMockItems()
         await databaseFunctions.putCollectionItems(database, collection, undefined, mockItems)
 

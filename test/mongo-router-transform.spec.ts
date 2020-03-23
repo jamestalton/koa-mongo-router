@@ -10,46 +10,46 @@ const collection = `test-transform-collection`
 let request: axios.AxiosInstance
 let server: Server
 
-beforeAll(async function() {
+beforeAll(async function () {
     const options: IDatabaseRouterOptions = {
-        getItemTransform: async item => {
+        getItemTransform: async (item) => {
             item.testGlobalGetTransform = 'global'
             return item
         },
-        putItemTransform: async item => {
+        putItemTransform: async (item) => {
             item.testGlobalPutTransform = 'global'
             return item
         },
         databases: {
             'test-transform-database': {
-                getItemTransform: async item => {
+                getItemTransform: async (item) => {
                     item.testDatabaseGetTransform = 'database'
                     return item
                 },
-                putItemTransform: async item => {
+                putItemTransform: async (item) => {
                     item.testDatabasePutTransform = 'database'
                     return item
                 },
                 collections: {
                     'test-transform-collection': {
-                        getItemTransform: async item => {
+                        getItemTransform: async (item) => {
                             item.testCollectionGetTransform = 'collection'
                             return item
                         },
-                        putItemTransform: async item => {
+                        putItemTransform: async (item) => {
                             item.testCollectionPutTransform = 'collection'
                             return item
-                        }
-                    }
-                }
-            }
-        }
+                        },
+                    },
+                },
+            },
+        },
     }
     server = await startApp(options)
     const port = (server.address() as AddressInfo).port
     request = axios.default.create({
         baseURL: `http://localhost:${port}/`,
-        validateStatus: () => true
+        validateStatus: () => true,
     })
 })
 
@@ -57,7 +57,7 @@ beforeEach(async () => {
     await request.delete(`/${database}`)
 })
 
-afterAll(async function() {
+afterAll(async function () {
     await request.delete(`/${database}`)
     await stopApp()
 })
@@ -75,7 +75,7 @@ function createMockItemID(index: number = 0) {
 function getMockItem(generateID = false, index: number = 1) {
     const mockItem: IMockItem = {
         name: `Item ${index}`,
-        group: (index % 2) + 1
+        group: (index % 2) + 1,
     }
     if (generateID) {
         mockItem._id = createMockItemID(index)
@@ -91,8 +91,8 @@ function getMockItems(count = 4) {
     return mockItems
 }
 
-describe(`GET /:database/:collection`, function() {
-    it(`should work with transform and 0 items in collection`, async function() {
+describe(`GET /:database/:collection`, function () {
+    it(`should work with transform and 0 items in collection`, async function () {
         let response = await request.delete(`/${database}/${collection}`)
         expect(response.status).toEqual(200)
 
@@ -102,8 +102,8 @@ describe(`GET /:database/:collection`, function() {
     })
 })
 
-describe(`PUT&GET /:database/:collection`, function() {
-    it(`should transform items`, async function() {
+describe(`PUT&GET /:database/:collection`, function () {
+    it(`should transform items`, async function () {
         const mockItems = getMockItems()
 
         let response = await request.put(`/${database}/${collection}`, mockItems)
@@ -114,7 +114,7 @@ describe(`PUT&GET /:database/:collection`, function() {
         response = await request.get(`/${database}/${collection}?$sort=name&$fields=-_id`)
         expect(response.status).toEqual(200)
         expect(response.data).toEqual(
-            mockItems.map(item => {
+            mockItems.map((item) => {
                 ;(item as any).testGlobalGetTransform = 'global'
                 ;(item as any).testDatabaseGetTransform = 'database'
                 ;(item as any).testCollectionGetTransform = 'collection'
@@ -127,14 +127,14 @@ describe(`PUT&GET /:database/:collection`, function() {
     })
 })
 
-describe(`POST&GET /:database/:collection/:id`, function() {
-    it(`should transform the item`, async function() {
+describe(`POST&GET /:database/:collection/:id`, function () {
+    it(`should transform the item`, async function () {
         let mockItem = getMockItem()
         const response = await request.post(`/${database}/${collection}`, mockItem)
         expect(response.status).toEqual(201)
         mockItem = {
             ...mockItem,
-            ...response.data
+            ...response.data,
         }
         ;(mockItem as any).testGlobalGetTransform = 'global'
         ;(mockItem as any).testDatabaseGetTransform = 'database'
@@ -148,14 +148,14 @@ describe(`POST&GET /:database/:collection/:id`, function() {
     })
 })
 
-describe(`PUT&GET /:database/:collection/:id`, function() {
-    it(`should transform the item`, async function() {
+describe(`PUT&GET /:database/:collection/:id`, function () {
+    it(`should transform the item`, async function () {
         let mockItem = getMockItem(true)
         const response = await request.put(`/${database}/${collection}/${mockItem._id}`, mockItem)
         expect(response.status).toEqual(201)
         mockItem = {
             ...mockItem,
-            ...response.data
+            ...response.data,
         }
         ;(mockItem as any).testGlobalGetTransform = 'global'
         ;(mockItem as any).testDatabaseGetTransform = 'database'

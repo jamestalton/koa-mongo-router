@@ -4,7 +4,7 @@ const defaultTransformOptions: TransformOptions = {
     writableObjectMode: true,
     readableObjectMode: true,
     objectMode: true,
-    autoDestroy: false
+    autoDestroy: false,
 }
 
 export class PromiseTransformStream extends Transform {
@@ -32,7 +32,7 @@ export class PromiseTransformStream extends Transform {
             callback()
         }
 
-        void this.transform(chunk).then(item => {
+        void this.transform(chunk).then((item) => {
             this.activeCount--
             this.results[index] = item
             while (this.results[this.pushIndex] != null && this.pushIndex < this.results.length) {
