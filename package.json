@@ -23,8 +23,8 @@
         "jest": "rm -rf coverage && jest",
         "lint": "tslint -p . && tslint -p test -c test/tslint.json",
         "lint-fix": "tslint -p . --fix && tslint -p test -c test/tslint.json --fix",
-        "check": "prettier --list-different **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
-        "format": "prettier --write **/*.ts **/*.json **/*.md !coverage/** !lib/** !**/package-lock.json",
+        "format": "prettier --write **/*.ts",
+        "check": "prettier --check **/*.ts",
         "clean": "rm -rf package-lock.json node_modules lib coverage",
         "update": "npm run clean && ncu -u && npm install && npm test"
     },
