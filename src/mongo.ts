@@ -7,6 +7,28 @@ if (process.env.MONGO_CONNECTION_STRING != undefined) {
 }
 
 let mongoClientPromise: Promise<MongoClient>
+let mongoClientOptions: MongoClientOptions = {
+    ignoreUndefined: true,
+    // bufferMaxEntries: 0,
+    useNewUrlParser: true,
+    // reconnectTries: Number.MAX_VALUE,
+    useUnifiedTopology: true,
+}
+
+export function setMongoClientOptions(options?: Partial<MongoClientOptions>): void {
+    if (options != undefined) {
+        mongoClientOptions = {
+            ...mongoClientOptions,
+            ...options,
+        }
+    }
+    resetMongoClient()
+}
+
+export function resetMongoClient(): void {
+    mongoClientPromise = undefined
+    databases = {}
+}
 
 export function getMongoClient(
     createConnection: boolean = true,
@@ -18,26 +40,12 @@ export function getMongoClient(
             return Promise.reject(new Error('No connection'))
         }
 
-        let clientOptions: MongoClientOptions = {
-            ignoreUndefined: true,
-            // bufferMaxEntries: 0,
-            useNewUrlParser: true,
-            // reconnectTries: Number.MAX_VALUE,
-            useUnifiedTopology: true,
-        }
+        setMongoClientOptions(options)
 
-        if (options != undefined) {
-            clientOptions = {
-                ...clientOptions,
-                ...options,
-            }
-        }
-
-        mongoClientPromise = MongoClient.connect(mongoConnectionString, clientOptions).catch(
+        mongoClientPromise = MongoClient.connect(mongoConnectionString, mongoClientOptions).catch(
             /* istanbul ignore next */
             (err) => {
-                mongoClientPromise = undefined
-                databases = {}
+                resetMongoClient()
                 throw err
             }
         )
