@@ -1,15 +1,7 @@
 language: node_js
 node_js: '10'
 install: npm ci
-
-before_script:
-    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
-    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
-    - mkdir -p ./data/db
-    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db --syslog --port 27017 --replSet my-replica-set
-    - sleep 2
-    - mongo --eval 'rs.initiate()'
-    - sleep 1
+services: mongodb
 
 jobs:
     include:
