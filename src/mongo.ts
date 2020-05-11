@@ -1,4 +1,4 @@
-import { Collection, Db, MongoClient, MongoError, Mongos, ReplSet, Server, MongoClientOptions } from 'mongodb'
+import { Collection, Db, MongoClient, MongoError, MongoClientOptions } from 'mongodb'
 import { logger } from 'node-server-utils'
 
 let mongoConnectionString = 'mongodb://localhost:27017'
@@ -54,35 +54,21 @@ export function getMongoClient(
     return mongoClientPromise
 }
 
-let databases: { [key: string]: Promise<Db> } = {}
+let databases: { [key: string]: Db } = {}
 
 export async function getDatabase(databaseName: string): Promise<Db> {
-    if (databases[databaseName] != undefined) {
-        return databases[databaseName]
+    const mongoClient = await getMongoClient()
+    const db = mongoClient.db(databaseName)
+
+    if (databases[databaseName] === db) {
+        return db
     }
 
-    const databasePromise: Promise<Db> = getMongoClient().then(function (mongoClient: MongoClient) {
-        return mongoClient.db(databaseName)
-    })
-    databases[databaseName] = databasePromise
-
-    const db: Db = await databasePromise
-
-    let databaseTopology: string = 'Unknown'
-
-    /* istanbul ignore else */
-    if (db.serverConfig instanceof Server) {
-        databaseTopology = 'server'
-    } else if (db.serverConfig instanceof ReplSet) {
-        databaseTopology = 'replication set'
-    } else if (db.serverConfig instanceof Mongos) {
-        databaseTopology = 'mongos'
-    }
+    databases[databaseName] = db
 
     logger.debug({
         message: 'database connected',
         database: db.databaseName,
-        topology: databaseTopology,
     })
 
     db.on(
@@ -119,13 +105,6 @@ export async function getDatabase(databaseName: string): Promise<Db> {
             }
         )
         .on(
-            'open',
-            /* istanbul ignore next */
-            () => {
-                logger.debug({ message: 'database open', database: db.databaseName })
-            }
-        )
-        .on(
             'close',
             /* istanbul ignore next */
             (mongoError: MongoError) => {
@@ -144,16 +123,6 @@ export async function getDatabase(databaseName: string): Promise<Db> {
             }
         )
         .on(
-            'reconnectFailed',
-            /* istanbul ignore next */
-            () => {
-                logger.error({
-                    message: 'database reconnectFailed',
-                    database: db.databaseName,
-                })
-            }
-        )
-        .on(
             'fullsetup',
             /* istanbul ignore next */
             () => {
@@ -163,25 +132,6 @@ export async function getDatabase(databaseName: string): Promise<Db> {
                 })
             }
         )
-
-    /* istanbul ignore next */
-    if (db.serverConfig instanceof ReplSet) {
-        const topology: any = (db as any).s.topology
-        topology.on('left', function (data: string) {
-            logger.info({
-                message: 'database replica set server left',
-                serverType: data,
-                database: db.databaseName,
-            })
-        })
-        topology.on('joined', function (data: string) {
-            logger.info({
-                message: 'database replica set server joined',
-                serverType: data,
-                database: db.databaseName,
-            })
-        })
-    }
 
     return db
 }
